@@ -33,6 +33,14 @@ def dashboard():
 def about():
     return send_from_directory('.', 'about.html')
 
+@app.route('/style.css')
+def style():
+    return send_from_directory('.', 'style.css')
+
+@app.route('/app.js')
+def script():
+    return send_from_directory('.', 'app.js')
+
 @app.route('/signup', methods=['POST'])
 def signup():
     data = request.json
