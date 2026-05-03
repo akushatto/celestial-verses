@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/(signup|login|poems.*)",
+      "destination": "app.py"
+    }
+  ]
+}
