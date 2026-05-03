@@ -31,13 +31,16 @@ def signup():
     existing = supabase.table('users').select('username').eq('username', username).execute()
     if existing.data:
         return jsonify({'error': 'Username already exists'}), 400
-    supabase.table('users').insert({
-        'username': username, 
-        'password': hash_password(password),
-        'avatar_url': 'https://api.dicebear.com/7.x/bottts-neutral/svg?seed=' + username,
-        'bio': 'A wandering star'
-    }).execute()
-    return jsonify({'message': 'User created successfully', 'username': username})
+    try:
+        supabase.table('users').insert({
+            'username': username, 
+            'password': hash_password(password),
+            'avatar_url': 'https://api.dicebear.com/7.x/bottts-neutral/svg?seed=' + username,
+            'bio': 'A wandering star'
+        }).execute()
+        return jsonify({'message': 'User created successfully', 'username': username})
+    except Exception as e:
+        return jsonify({'error': f'Database error: {str(e)}'}), 500
 
 @app.route('/login', methods=['POST'])
 def login():
