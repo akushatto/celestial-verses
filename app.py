@@ -1,13 +1,15 @@
 import sqlite3
-from flask import Flask, request, jsonify
+import os
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import hashlib
 import uuid
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='.')
 CORS(app)
 
-DB_FILE = 'database.db'
+# On Vercel, we can only write to /tmp
+DB_FILE = '/tmp/database.db' if os.environ.get('VERCEL') else 'database.db'
 
 def init_db():
     conn = sqlite3.connect(DB_FILE)
@@ -33,6 +35,10 @@ def init_db():
 
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
+
+@app.route('/')
+def index():
+    return send_from_directory('.', 'index.html')
 
 @app.route('/signup', methods=['POST'])
 def signup():
@@ -112,28 +118,6 @@ def add_poem():
     
     return jsonify({'id': poem_id, 'title': title, 'author': author, 'text': text})
 
-@app.route('/poems/<poem_id>', methods=['DELETE'])
-def delete_poem(poem_id):
-    username = request.args.get('username')
-    if not username:
-        return jsonify({'error': 'Username is required'}), 400
-        
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    c.execute('DELETE FROM poems WHERE id = ? AND username = ?', (poem_id, username))
-    conn.commit()
-    deleted = c.rowcount > 0
-    conn.close()
-    
-    if deleted:
-        return jsonify({'message': 'Poem deleted'})
-    else:
-        return jsonify({'error': 'Poem not found or unauthorized'}), 404
-
-if __name__ == '__main__':
-    init_db()
-    app.run(port=5000, debug=True)
-
 @app.route('/poems/<poem_id>', methods=['PUT'])
 def edit_poem(poem_id):
     data = request.json
@@ -157,3 +141,27 @@ def edit_poem(poem_id):
         return jsonify({'id': poem_id, 'title': title, 'author': author, 'text': text})
     else:
         return jsonify({'error': 'Poem not found or unauthorized'}), 404
+
+@app.route('/poems/<poem_id>', methods=['DELETE'])
+def delete_poem(poem_id):
+    username = request.args.get('username')
+    if not username:
+        return jsonify({'error': 'Username is required'}), 400
+        
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute('DELETE FROM poems WHERE id = ? AND username = ?', (poem_id, username))
+    conn.commit()
+    deleted = c.rowcount > 0
+    conn.close()
+    
+    if deleted:
+        return jsonify({'message': 'Poem deleted'})
+    else:
+        return jsonify({'error': 'Poem not found or unauthorized'}), 404
+
+# Initialize DB on start
+init_db()
+
+if __name__ == '__main__':
+    app.run(port=5000, debug=True)
