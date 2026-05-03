@@ -1,37 +1,18 @@
-import sqlite3
 import os
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import hashlib
-import uuid
+from supabase import create_client, Client
 
 app = Flask(__name__, static_folder='.')
 CORS(app)
 
-# On Vercel, we can only write to /tmp
-DB_FILE = '/tmp/database.db' if os.environ.get('VERCEL') else 'database.db'
+# Supabase Credentials
+# On Vercel, these should be set in the Dashboard -> Settings -> Environment Variables
+SUPABASE_URL = os.environ.get('SUPABASE_URL', 'https://rxqchbuejyjhkkprmbbd.supabase.co')
+SUPABASE_KEY = os.environ.get('SUPABASE_KEY', 'sb_publishable_z3jN_dRMvgIRDErx61qheA_fyP307qh')
 
-def init_db():
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            username TEXT PRIMARY KEY,
-            password TEXT NOT NULL
-        )
-    ''')
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS poems (
-            id TEXT PRIMARY KEY,
-            username TEXT NOT NULL,
-            title TEXT NOT NULL,
-            author TEXT NOT NULL,
-            text TEXT NOT NULL,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
-    conn.commit()
-    conn.close()
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
@@ -49,16 +30,16 @@ def signup():
     if not username or not password:
         return jsonify({'error': 'Username and password are required'}), 400
         
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    c.execute('SELECT username FROM users WHERE username = ?', (username,))
-    if c.fetchone():
-        conn.close()
+    # Check if user exists
+    existing = supabase.table('users').select('username').eq('username', username).execute()
+    if existing.data:
         return jsonify({'error': 'Username already exists'}), 400
         
-    c.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, hash_password(password)))
-    conn.commit()
-    conn.close()
+    # Insert user
+    supabase.table('users').insert({
+        'username': username,
+        'password': hash_password(password)
+    }).execute()
     
     return jsonify({'message': 'User created successfully', 'username': username})
 
@@ -71,13 +52,10 @@ def login():
     if not username or not password:
         return jsonify({'error': 'Username and password are required'}), 400
         
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    c.execute('SELECT password FROM users WHERE username = ?', (username,))
-    row = c.fetchone()
-    conn.close()
+    # Get user
+    user = supabase.table('users').select('password').eq('username', username).execute()
     
-    if not row or row[0] != hash_password(password):
+    if not user.data or user.data[0]['password'] != hash_password(password):
         return jsonify({'error': 'Invalid username or password'}), 401
         
     return jsonify({'message': 'Login successful', 'username': username})
@@ -88,13 +66,10 @@ def get_poems():
     if not username:
         return jsonify({'error': 'Username is required'}), 400
         
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    c.execute('SELECT id, title, author, text FROM poems WHERE username = ? ORDER BY timestamp DESC', (username,))
-    poems = [{'id': row[0], 'title': row[1], 'author': row[2], 'text': row[3]} for row in c.fetchall()]
-    conn.close()
+    # Get poems
+    res = supabase.table('poems').select('*').eq('username', username).order('created_at', desc=True).execute()
     
-    return jsonify(poems)
+    return jsonify(res.data)
 
 @app.route('/poems', methods=['POST'])
 def add_poem():
@@ -107,16 +82,15 @@ def add_poem():
     if not all([username, title, author, text]):
         return jsonify({'error': 'All fields are required'}), 400
         
-    poem_id = str(uuid.uuid4())
+    # Insert poem
+    res = supabase.table('poems').insert({
+        'username': username,
+        'title': title,
+        'author': author,
+        'text': text
+    }).execute()
     
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    c.execute('INSERT INTO poems (id, username, title, author, text) VALUES (?, ?, ?, ?, ?)',
-              (poem_id, username, title, author, text))
-    conn.commit()
-    conn.close()
-    
-    return jsonify({'id': poem_id, 'title': title, 'author': author, 'text': text})
+    return jsonify(res.data[0])
 
 @app.route('/poems/<poem_id>', methods=['PUT'])
 def edit_poem(poem_id):
@@ -129,16 +103,15 @@ def edit_poem(poem_id):
     if not all([username, title, author, text]):
         return jsonify({'error': 'All fields are required'}), 400
         
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    c.execute('UPDATE poems SET title = ?, author = ?, text = ? WHERE id = ? AND username = ?',
-              (title, author, text, poem_id, username))
-    conn.commit()
-    updated = c.rowcount > 0
-    conn.close()
+    # Update poem
+    res = supabase.table('poems').update({
+        'title': title,
+        'author': author,
+        'text': text
+    }).eq('id', poem_id).eq('username', username).execute()
     
-    if updated:
-        return jsonify({'id': poem_id, 'title': title, 'author': author, 'text': text})
+    if res.data:
+        return jsonify(res.data[0])
     else:
         return jsonify({'error': 'Poem not found or unauthorized'}), 404
 
@@ -148,20 +121,13 @@ def delete_poem(poem_id):
     if not username:
         return jsonify({'error': 'Username is required'}), 400
         
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    c.execute('DELETE FROM poems WHERE id = ? AND username = ?', (poem_id, username))
-    conn.commit()
-    deleted = c.rowcount > 0
-    conn.close()
+    # Delete poem
+    res = supabase.table('poems').delete().eq('id', poem_id).eq('username', username).execute()
     
-    if deleted:
+    if res.data:
         return jsonify({'message': 'Poem deleted'})
     else:
         return jsonify({'error': 'Poem not found or unauthorized'}), 404
-
-# Initialize DB on start
-init_db()
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
