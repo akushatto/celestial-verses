@@ -10,13 +10,15 @@
             }
         }
         function drawStars() {
-            ctx.clearRect(0, 0, W, H);
-            stars.forEach(s => {
-                s.t += s.speed * .02;
-                const flicker = s.o + Math.sin(s.t) * 0.15;
-                ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255,255,255,${Math.max(0, flicker)})`; ctx.fill();
-            });
+            if (!document.hidden) {
+                ctx.clearRect(0, 0, W, H);
+                stars.forEach(s => {
+                    s.t += s.speed * .02;
+                    const flicker = s.o + Math.sin(s.t) * 0.15;
+                    ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255,255,255,${Math.max(0, flicker)})`; ctx.fill();
+                });
+            }
             requestAnimationFrame(drawStars);
         }
         window.addEventListener('resize', resize);
