@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Celestial Verses — Poems of the Cosmos</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Cinzel:wght@400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <canvas id="starfield"></canvas>
+
+    
+    <nav>
+        <a href="/">Home</a>
+        <a href="/library">Cosmic Library</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/about">About</a>
+        <div id="loginBtn" style="color: var(--gold); border-left: 1px solid rgba(255,255,255,0.1); padding-left: 1rem; cursor: pointer;">Login</div>
+        <div class="moon-widget">
+            <div class="moon-phase-icon"><div id="moonShadow" class="moon-shadow"></div></div>
+            <span id="moonPhaseName">Loading...</span>
+        </div>
+    </nav>
+
+
+    <!-- AMBIENT PLAYER -->
+    <div class="ambient-player">
+        <button class="audio-btn" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3">Space Ambience</button>
+        <button class="audio-btn" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3">Lunar Echoes</button>
+        <button class="audio-btn" id="stopAudio">Mute</button>
+    </div>
+
+    
+    <div class="hero" style="display:none;">
+        <div class="hero-astrolabe">
+            <div class="astro-ring ring1"></div>
+            <div class="astro-ring ring2"></div>
+            <div class="astro-ring ring3"></div>
+            <div class="astro-core"></div>
+        </div>
+        <div class="hero-inner">
+            <div class="hero-label">A Cosmic Anthology</div>
+            <h1>Celestial Verses</h1>
+            <p>Poems of Seasons · Moon · Eclipse · Sun · Space</p>
+            <div id="dailyQuote" class="daily-quote"></div>
+        </div>
+        <div class="scroll-hint">
+            <span>Discover</span>
+            <div class="chevron"></div>
+        </div>
+    </div>
+
+    <div class="cosmos-divider"></div>
+
+    
+    <section class="space-sec" style="padding-top: 100px; text-align: center; min-height: 80vh;">
+        <div class="section-title">✦ About Celestial Verses ✦</div>
+        <p class="section-sub" style="max-width: 600px; margin: 0 auto; line-height: 1.8;">
+            Celestial Verses is an interactive anthology mapping the poetry of the stars. 
+            It is a place where classical literature meets modern technology. 
+            Built as a sanctuary for stargazers and poets, we invite you to share your verses 
+            with the cosmos, read the timeless classics, and leave your mark on the universe.
+        </p>
+    </section>
+<!-- ===== FEEDBACK ===== -->
+    <section id="feedback" class="space-sec" style="padding-top: 3rem;">
+        <div class="feedback-form">
+            <div class="section-title" style="font-size: 1.5rem;">✦ Send Feedback ✦</div>
+            <p class="section-sub" style="margin-bottom: 1.5rem;">Whisper your suggestions to the void</p>
+            <form id="feedbackForm" class="poem-form" style="max-width: 100%;">
+                <textarea id="feedbackMsg" placeholder="Your thoughts..." required></textarea>
+                <button type="submit">Submit Feedback</button>
+            </form>
+            <p id="feedbackConfirm" style="color: var(--teal); font-size: 0.9rem; margin-top: 1rem; display: none;">✨ Feedback sent to the stars!</p>
+        </div>
+    </section>
+
+    <div class="cosmos-divider"></div>
+
+    <!-- ===== INTERACTIVE MAP ===== -->
+    <section id="constellations" class="space-sec">
+        <div class="section-title">✦ Interactive Map ✦</div>
+        <p class="section-sub">Click on stars to discover hidden verses in the sky</p>
+        <div class="constellation-map" id="constellationMap">
+            <!-- Interactive stars will be added here -->
+        </div>
+    </section>
+
+    <div class="cosmos-divider"></div>
+
+    <!-- AUTH MODAL -->
+    <div id="authModal" class="auth-modal">
+        <div class="auth-box">
+            <h2 id="authTitle">Login to Your Space</h2>
+            <form id="authForm" autocomplete="off">
+                <input type="text" id="authUsername" placeholder="Username" required>
+                <input type="password" id="authPassword" placeholder="Password" required>
+                <div class="auth-error" id="authError"></div>
+                <button type="submit" id="authSubmit">Login</button>
+            </form>
+            <p class="auth-toggle">
+                <span id="authToggleText">New here?</span> 
+                <a href="#" id="authToggleBtn">Sign Up</a>
+            </p>
+            <button class="auth-close" id="authClose">×</button>
+        </div>
+    </div>
+
+    <footer>Celestial Verses — A Cosmic Anthology &nbsp;·&nbsp; All poems are in the public domain or used for poetic
+        tribute</footer>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

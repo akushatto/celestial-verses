@@ -1,11 +1,8 @@
 {
+  "cleanUrls": true,
   "rewrites": [
     {
-      "source": "/",
-      "destination": "app.py"
-    },
-    {
-      "source": "/(signup|login|poems.*)",
+      "source": "/(signup|login|profile|poems|poems/.*|public-poems|insights|feedback|search|comments|follow)",
       "destination": "app.py"
     }
   ]

@@ -21,6 +21,18 @@ def hash_password(password):
 def index():
     return send_from_directory('.', 'index.html')
 
+@app.route('/library')
+def library():
+    return send_from_directory('.', 'library.html')
+
+@app.route('/dashboard')
+def dashboard():
+    return send_from_directory('.', 'dashboard.html')
+
+@app.route('/about')
+def about():
+    return send_from_directory('.', 'about.html')
+
 @app.route('/signup', methods=['POST'])
 def signup():
     data = request.json
@@ -136,6 +148,48 @@ def submit_feedback():
     message = data.get('message')
     supabase.table('feedback').insert({'username': username, 'message': message}).execute()
     return jsonify({'message': 'Thank you for your feedback!'})
+
+@app.route('/search', methods=['GET'])
+def search_poems():
+    query = request.args.get('q', '')
+    if not query:
+        return jsonify([])
+    # Simple ilike search since gin index handles it well
+    res = supabase.table('poems').select('*, stars(count)').eq('is_public', True).ilike('title', f'%{query}%').execute()
+    data = []
+    for p in res.data:
+        p['star_count'] = p.get('stars', [{}])[0].get('count', 0) if isinstance(p.get('stars'), list) else 0
+        data.append(p)
+    return jsonify(data)
+
+@app.route('/comments', methods=['GET', 'POST'])
+def handle_comments():
+    if request.method == 'GET':
+        poem_id = request.args.get('poem_id')
+        res = supabase.table('comments').select('*').eq('poem_id', poem_id).order('created_at', desc=False).execute()
+        return jsonify(res.data)
+    else:
+        data = request.json
+        supabase.table('comments').insert({
+            'poem_id': data['poem_id'],
+            'username': data['username'],
+            'text': data['text']
+        }).execute()
+        return jsonify({'success': True})
+
+@app.route('/follow', methods=['POST'])
+def toggle_follow():
+    data = request.json
+    follower = data['follower']
+    following = data['following']
+    # Check if already following
+    existing = supabase.table('follows').select('*').eq('follower', follower).eq('following', following).execute()
+    if existing.data:
+        supabase.table('follows').delete().eq('follower', follower).eq('following', following).execute()
+        return jsonify({'status': 'unfollowed'})
+    else:
+        supabase.table('follows').insert({'follower': follower, 'following': following}).execute()
+        return jsonify({'status': 'followed'})
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
