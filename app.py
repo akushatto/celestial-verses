@@ -31,7 +31,12 @@ def signup():
     existing = supabase.table('users').select('username').eq('username', username).execute()
     if existing.data:
         return jsonify({'error': 'Username already exists'}), 400
-    supabase.table('users').insert({'username': username, 'password': hash_password(password)}).execute()
+    supabase.table('users').insert({
+        'username': username, 
+        'password': hash_password(password),
+        'avatar_url': 'https://api.dicebear.com/7.x/bottts-neutral/svg?seed=' + username,
+        'bio': 'A wandering star'
+    }).execute()
     return jsonify({'message': 'User created successfully', 'username': username})
 
 @app.route('/login', methods=['POST'])
@@ -46,19 +51,32 @@ def login():
         return jsonify({'error': 'Invalid username or password'}), 401
     return jsonify({'message': 'Login successful', 'username': username})
 
+@app.route('/profile', methods=['GET'])
+def get_profile():
+    username = request.args.get('username')
+    if not username: return jsonify({'error': 'Username required'}), 400
+    res = supabase.table('users').select('avatar_url, bio').eq('username', username).execute()
+    return jsonify(res.data[0]) if res.data else jsonify({'error': 'Not found'}), 404
+
+@app.route('/profile', methods=['PUT'])
+def update_profile():
+    data = request.json
+    username = data.get('username')
+    avatar_url = data.get('avatar_url')
+    bio = data.get('bio')
+    res = supabase.table('users').update({'avatar_url': avatar_url, 'bio': bio}).eq('username', username).execute()
+    return jsonify(res.data[0])
+
 @app.route('/poems', methods=['GET'])
 def get_poems():
     username = request.args.get('username')
-    if not username:
-        return jsonify({'error': 'Username is required'}), 400
+    if not username: return jsonify({'error': 'Username is required'}), 400
     res = supabase.table('poems').select('*').eq('username', username).order('created_at', desc=True).execute()
     return jsonify(res.data)
 
 @app.route('/public-poems', methods=['GET'])
 def get_public_poems():
-    # Fetch public poems and join with star count
     res = supabase.table('poems').select('*, stars(count)').eq('is_public', True).order('created_at', desc=True).execute()
-    # Flatten the count
     data = []
     for p in res.data:
         p['star_count'] = p.get('stars', [{}])[0].get('count', 0) if isinstance(p.get('stars'), list) else 0
@@ -73,70 +91,48 @@ def add_poem():
     author = data.get('author')
     text = data.get('text')
     is_public = data.get('is_public', False)
-    if not all([username, title, author, text]):
-        return jsonify({'error': 'All fields are required'}), 400
     res = supabase.table('poems').insert({
         'username': username, 'title': title, 'author': author, 'text': text, 'is_public': is_public
     }).execute()
     return jsonify(res.data[0])
 
-@app.route('/poems/<poem_id>', methods=['PUT'])
-def edit_poem(poem_id):
-    data = request.json
-    username = data.get('username')
-    title = data.get('title')
-    author = data.get('author')
-    text = data.get('text')
-    is_public = data.get('is_public', False)
-    res = supabase.table('poems').update({
-        'title': title, 'author': author, 'text': text, 'is_public': is_public
-    }).eq('id', poem_id).eq('username', username).execute()
-    if res.data:
-        return jsonify(res.data[0])
-    return jsonify({'error': 'Unauthorized'}), 404
+@app.route('/poems/<poem_id>/view', methods=['POST'])
+def view_poem(poem_id):
+    # Increment view count
+    curr = supabase.table('poems').select('view_count').eq('id', poem_id).execute()
+    if curr.data:
+        new_count = (curr.data[0].get('view_count') or 0) + 1
+        supabase.table('poems').update({'view_count': new_count}).eq('id', poem_id).execute()
+    return jsonify({'success': True})
 
-@app.route('/poems/<poem_id>', methods=['DELETE'])
-def delete_poem(poem_id):
+@app.route('/insights', methods=['GET'])
+def get_insights():
     username = request.args.get('username')
-    res = supabase.table('poems').delete().eq('id', poem_id).eq('username', username).execute()
-    return jsonify({'message': 'Deleted'}) if res.data else jsonify({'error': 'Unauthorized'}), 404
-
-@app.route('/poems/<poem_id>/star', methods=['POST'])
-def star_poem(poem_id):
-    username = request.json.get('username')
-    if not username: return jsonify({'error': 'Login required'}), 401
-    try:
-        supabase.table('stars').insert({'username': username, 'poem_id': poem_id}).execute()
-        return jsonify({'message': 'Starred'})
-    except:
-        # If already starred, unstar
-        supabase.table('stars').delete().eq('username', username).eq('poem_id', poem_id).execute()
-        return jsonify({'message': 'Unstarred'})
-
-@app.route('/generate-poem', methods=['POST'])
-def generate_poem():
-    keyword = request.json.get('keyword', 'Stars')
-    prompts = [
-        f"In the silence of the {keyword}, stardust whispers secrets of old.",
-        f"Beneath the {keyword} sky, we are but echoes of an ancient light.",
-        f"The {keyword} dance in a rhythm only the soul can hear.",
-        f"Like {keyword} across the void, our dreams travel further than light.",
-        f"A fragment of {keyword} rests in every breath we take."
-    ]
-    return jsonify({'suggestion': random.choice(prompts)})
-
-@app.route('/user-stats', methods=['GET'])
-def user_stats():
-    username = request.args.get('username')
-    poems = supabase.table('poems').select('count', count='exact').eq('username', username).execute()
-    # Count stars received across all poems
-    user_poems = supabase.table('poems').select('id').eq('username', username).execute()
-    ids = [p['id'] for p in user_poems.data]
+    poems = supabase.table('poems').select('id, title, view_count').eq('username', username).execute()
+    total_views = sum(p.get('view_count') or 0 for p in poems.data)
+    most_viewed = max(poems.data, key=lambda x: x.get('view_count') or 0) if poems.data else None
+    
+    # Stars
+    ids = [p['id'] for p in poems.data]
     stars = 0
     if ids:
         star_res = supabase.table('stars').select('count', count='exact').filter('poem_id', 'in', f"({','.join(ids)})").execute()
         stars = star_res.count
-    return jsonify({'count': poems.count, 'stars': stars})
+        
+    return jsonify({
+        'total_views': total_views,
+        'total_stars': stars,
+        'poem_count': len(poems.data),
+        'most_viewed': most_viewed
+    })
+
+@app.route('/feedback', methods=['POST'])
+def submit_feedback():
+    data = request.json
+    username = data.get('username')
+    message = data.get('message')
+    supabase.table('feedback').insert({'username': username, 'message': message}).execute()
+    return jsonify({'message': 'Thank you for your feedback!'})
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
