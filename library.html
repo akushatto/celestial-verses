@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Celestial Verses — Poems of the Cosmos</title>
+    <title>Cosmic Library — Celestial Verses</title>
+    <meta name="description" content="Browse the public library of celestial poetry, search by keyword, and discover new poets.">
     <link
         href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Cinzel:wght@400;600&display=swap"
         rel="stylesheet">
@@ -17,10 +18,10 @@
 
     
     <nav>
-        <a href="/">Home</a>
-        <a href="/library.html">Cosmic Library</a>
-        <a href="/dashboard.html">Dashboard</a>
-        <a href="/about.html">About</a>
+        <a href="index.html">Home</a>
+        <a href="library.html">Cosmic Library</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="about.html">About</a>
         <div id="loginBtn" style="color: var(--gold); border-left: 1px solid rgba(255,255,255,0.1); padding-left: 1rem; cursor: pointer;">Login</div>
         <div class="moon-widget">
             <div class="moon-phase-icon"><div id="moonShadow" class="moon-shadow"></div></div>
@@ -64,6 +65,13 @@
     <div style="text-align: center; margin-bottom: 2rem;">
         <input type="text" id="searchInput" placeholder="Search the cosmos..." style="padding: 0.8rem; width: 300px; border-radius: 4px; border: 1px solid var(--gold); background: rgba(0,0,0,0.5); color: white; font-family: 'Cinzel';">
         <button id="searchBtn" class="action-btn">Search</button>
+        <select id="categorySelect" style="padding: 0.8rem; margin-left: 10px; border-radius: 4px; border: 1px solid var(--gold); background: rgba(0,0,0,0.5); color: white; font-family: 'Cinzel';">
+            <option value="">All Categories</option>
+            <option value="Star-themed">Star-themed</option>
+            <option value="Nature-themed">Nature-themed</option>
+            <option value="Emotional">Emotional</option>
+        </select>
+
     </div>
 <!-- ===== PUBLIC LIBRARY ===== -->
     <section id="public-library" class="public-library-sec">
