@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/(signup|login|profile|poems|poems/.*|public-poems|insights|feedback|search|comments|follow|user-stats)",
+      "destination": "app.py"
+    }
+  ]
+}

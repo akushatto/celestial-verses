@@ -17,7 +17,7 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
-@app.route('/api/signup', methods=['POST'])
+@app.route('/signup', methods=['POST'])
 def signup():
     data = request.json
     username = data.get('username')
@@ -38,7 +38,7 @@ def signup():
     except Exception as e:
         return jsonify({'error': f'Database error: {str(e)}'}), 500
 
-@app.route('/api/login', methods=['POST'])
+@app.route('/login', methods=['POST'])
 def login():
     data = request.json
     username = data.get('username')
@@ -50,14 +50,14 @@ def login():
         return jsonify({'error': 'Invalid username or password'}), 401
     return jsonify({'message': 'Login successful', 'username': username})
 
-@app.route('/api/profile', methods=['GET'])
+@app.route('/profile', methods=['GET'])
 def get_profile():
     username = request.args.get('username')
     if not username: return jsonify({'error': 'Username required'}), 400
     res = supabase.table('users').select('avatar_url, bio').eq('username', username).execute()
     return jsonify(res.data[0]) if res.data else jsonify({'error': 'Not found'}), 404
 
-@app.route('/api/profile', methods=['PUT'])
+@app.route('/profile', methods=['PUT'])
 def update_profile():
     data = request.json
     username = data.get('username')
@@ -66,14 +66,14 @@ def update_profile():
     res = supabase.table('users').update({'avatar_url': avatar_url, 'bio': bio}).eq('username', username).execute()
     return jsonify(res.data[0])
 
-@app.route('/api/poems', methods=['GET'])
+@app.route('/poems', methods=['GET'])
 def get_poems():
     username = request.args.get('username')
     if not username: return jsonify({'error': 'Username is required'}), 400
     res = supabase.table('poems').select('*').eq('username', username).order('created_at', desc=True).execute()
     return jsonify(res.data)
 
-@app.route('/api/public-poems', methods=['GET'])
+@app.route('/public-poems', methods=['GET'])
 def get_public_poems():
     res = supabase.table('poems').select('*, stars(count)').eq('is_public', True).order('created_at', desc=True).execute()
     data = []
@@ -82,7 +82,7 @@ def get_public_poems():
         data.append(p)
     return jsonify(data)
 
-@app.route('/api/poems', methods=['POST'])
+@app.route('/poems', methods=['POST'])
 def add_poem():
     data = request.json
     username = data.get('username')
@@ -95,7 +95,7 @@ def add_poem():
     }).execute()
     return jsonify(res.data[0])
 
-@app.route('/api/poems/<poem_id>/view', methods=['POST'])
+@app.route('/poems/<poem_id>/view', methods=['POST'])
 def view_poem(poem_id):
     # Increment view count
     curr = supabase.table('poems').select('view_count').eq('id', poem_id).execute()
@@ -104,7 +104,7 @@ def view_poem(poem_id):
         supabase.table('poems').update({'view_count': new_count}).eq('id', poem_id).execute()
     return jsonify({'success': True})
 
-@app.route('/api/poems/<poem_id>/star', methods=['POST'])
+@app.route('/poems/<poem_id>/star', methods=['POST'])
 def star_poem(poem_id):
     data = request.json
     username = data.get('username')
@@ -116,7 +116,7 @@ def star_poem(poem_id):
         supabase.table('stars').insert({'poem_id': poem_id, 'username': username}).execute()
         return jsonify({'status': 'starred'})
 
-@app.route('/api/user-stats', methods=['GET'])
+@app.route('/user-stats', methods=['GET'])
 def get_user_stats():
     username = request.args.get('username')
     poems = supabase.table('poems').select('id').eq('username', username).execute()
@@ -130,7 +130,7 @@ def get_user_stats():
         
     return jsonify({'count': poem_count, 'stars': stars})
 
-@app.route('/api/insights', methods=['GET'])
+@app.route('/insights', methods=['GET'])
 def get_insights():
     username = request.args.get('username')
     poems = supabase.table('poems').select('id, title, view_count').eq('username', username).execute()
@@ -151,7 +151,7 @@ def get_insights():
         'most_viewed': most_viewed
     })
 
-@app.route('/api/feedback', methods=['POST'])
+@app.route('/feedback', methods=['POST'])
 def submit_feedback():
     data = request.json
     username = data.get('username')
@@ -159,7 +159,7 @@ def submit_feedback():
     supabase.table('feedback').insert({'username': username, 'message': message}).execute()
     return jsonify({'message': 'Thank you for your feedback!'})
 
-@app.route('/api/search', methods=['GET'])
+@app.route('/search', methods=['GET'])
 def search_poems():
     query = request.args.get('q', '')
     if not query:
@@ -172,7 +172,7 @@ def search_poems():
         data.append(p)
     return jsonify(data)
 
-@app.route('/api/comments', methods=['GET', 'POST'])
+@app.route('/comments', methods=['GET', 'POST'])
 def handle_comments():
     if request.method == 'GET':
         poem_id = request.args.get('poem_id')
@@ -187,7 +187,7 @@ def handle_comments():
         }).execute()
         return jsonify({'success': True})
 
-@app.route('/api/follow', methods=['POST'])
+@app.route('/follow', methods=['POST'])
 def toggle_follow():
     data = request.json
     follower = data['follower']
