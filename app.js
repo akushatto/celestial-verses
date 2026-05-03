@@ -257,7 +257,8 @@
         });
 
         function renderPoems() {
-            if(poemGrid) poemGrid.innerHTML = '';
+            if(!poemGrid) return;
+            poemGrid.innerHTML = '';
             if (!currentUser) {
                 poemGrid.innerHTML = '<p style="text-align: center; grid-column: 1/-1; opacity: 0.6;">Please login to view and add your poems.</p>';
                 return;
