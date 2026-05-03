@@ -17,14 +17,16 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+
 @app.route('/')
 def index():
-    return send_from_directory('.', 'index.html')
+    return send_from_directory(ROOT_DIR, 'index.html')
 
 @app.route('/<path:filename>')
 def serve_static(filename):
     # This safely serves style.css, app.js, library.html, etc.
-    return send_from_directory('.', filename)
+    return send_from_directory(ROOT_DIR, filename)
 
 @app.route('/signup', methods=['POST'])
 def signup():
