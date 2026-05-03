@@ -791,6 +791,158 @@
             opacity: 0
         }
 
+        /* NEW FEATURES STYLES */
+        .moon-widget {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--silver);
+            font-family: 'Cinzel';
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+        }
+        .moon-phase-icon {
+            width: 18px; height: 18px;
+            background: #d4c5f0;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(212, 197, 240, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        .moon-shadow {
+            position: absolute;
+            background: var(--deep);
+            border-radius: 50%;
+            transition: all 0.5s;
+        }
+
+        .ambient-player {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            background: rgba(5, 10, 26, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            transition: all 0.3s;
+        }
+        .ambient-player:hover { border-color: var(--teal); }
+        .audio-btn {
+            background: none; border: none;
+            color: var(--silver);
+            font-family: 'Cinzel';
+            font-size: 0.7rem;
+            cursor: pointer;
+            padding: 0.2rem 0.5rem;
+            opacity: 0.6;
+            transition: all 0.3s;
+        }
+        .audio-btn.active { opacity: 1; color: var(--teal); text-shadow: 0 0 8px var(--teal); }
+
+        .public-library-sec .section-title { color: var(--teal); }
+        .public-library-sec .divider { color: var(--teal); }
+        
+        .star-btn {
+            background: rgba(201, 168, 76, 0.05);
+            border: 1px solid var(--gold);
+            color: var(--gold);
+        }
+        .star-btn.active {
+            background: var(--gold);
+            color: var(--deep);
+        }
+        
+        .ai-assistant-wrap {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .ai-suggest-btn {
+            background: linear-gradient(135deg, var(--teal), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-family: 'Cinzel';
+            font-size: 0.75rem;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-weight: 600;
+        }
+        .ai-suggest-btn:hover { filter: brightness(1.2); }
+        
+        .user-badge-wrap {
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .user-badge {
+            background: linear-gradient(to right, var(--gold), #fff, var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-family: 'Cinzel';
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+        .user-stats {
+            font-size: 0.75rem;
+            color: var(--silver);
+            opacity: 0.7;
+        }
+
+        .constellation-map {
+            width: 100%;
+            height: 500px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            position: relative;
+            cursor: crosshair;
+            overflow: hidden;
+        }
+        .map-star {
+            position: absolute;
+            width: 4px; height: 4px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #fff;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .map-star:hover { transform: scale(3); }
+        .map-label {
+            position: absolute;
+            font-family: 'Cinzel';
+            font-size: 0.6rem;
+            color: var(--gold);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .map-star:hover + .map-label { opacity: 1; }
+
+        .is-public-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-family: 'Cinzel';
+            font-size: 0.75rem;
+            color: var(--silver);
+            margin-top: 0.5rem;
+        }
+        .is-public-wrap input { margin: 0; width: auto; cursor: pointer; }
+
         @keyframes drift {
             0% {
                 transform: translateY(100vh) translateX(0) scale(0);
@@ -1036,10 +1188,19 @@
         <a href="#moon">Moon</a>
         <a href="#eclipse">Eclipse</a>
         <a href="#sun">Sun</a>
-        <a href="#space">Space</a>
-        <a href="#personal-space">Your Space</a>
-        <a href="#" id="loginBtn" style="color: var(--gold); border-left: 1px solid rgba(255,255,255,0.1); padding-left: 1rem;">Login</a>
+        <div id="loginBtn" style="color: var(--gold); border-left: 1px solid rgba(255,255,255,0.1); padding-left: 1rem; cursor: pointer;">Login</div>
+        <div class="moon-widget">
+            <div class="moon-phase-icon"><div id="moonShadow" class="moon-shadow"></div></div>
+            <span id="moonPhaseName">Loading...</span>
+        </div>
     </nav>
+
+    <!-- AMBIENT PLAYER -->
+    <div class="ambient-player">
+        <button class="audio-btn" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3">Space Ambience</button>
+        <button class="audio-btn" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3">Lunar Echoes</button>
+        <button class="audio-btn" id="stopAudio">Mute</button>
+    </div>
 
     <!-- HERO -->
     <div class="hero">
@@ -1651,30 +1812,71 @@
         </div>
     </section>
 
+    <!-- ===== PUBLIC LIBRARY ===== -->
+    <section id="public-library" class="public-library-sec">
+        <div class="section-title">✦ The Cosmic Library ✦</div>
+        <p class="section-sub">Public verses shared by stargazers across the void</p>
+        <div class="divider">
+            <div class="divider-line"></div>
+            <div class="divider-icon">✺</div>
+            <div class="divider-line"></div>
+        </div>
+        <div id="publicPoemGrid" class="poem-grid">
+            <!-- Public poems will be rendered here -->
+        </div>
+    </section>
+
     <div class="cosmos-divider"></div>
 
     <!-- ===== PERSONAL SPACE ===== -->
     <section id="personal-space" class="personal-sec">
         <div class="section-title">✦ Your Space ✦</div>
-        <p class="section-sub">Weave your own constellations</p>
+        <p class="section-sub">Your private constellations of thought</p>
+        
+        <div id="userStatsWrap" class="user-badge-wrap" style="display: none;">
+            <div id="userBadge" class="user-badge">Stardust Wanderer</div>
+            <div id="userStats" class="user-stats">0 Poems · 0 Stars</div>
+        </div>
+
         <div class="divider">
             <div class="divider-line"></div>
-            <div class="divider-icon">✨</div>
+            <div class="divider-icon">✧</div>
             <div class="divider-line"></div>
         </div>
 
-        <form id="customPoemForm" class="poem-form">
+        <form id="customPoemForm" class="poem-form" style="display: none;">
+            <div class="ai-assistant-wrap">
+                <button type="button" id="aiSuggestBtn" class="ai-suggest-btn">✨ Ask the Stars for a line</button>
+                <span id="aiSuggestion" style="font-size: 0.8rem; font-style: italic; opacity: 0.7;"></span>
+            </div>
             <input type="hidden" id="poemId">
-            <input type="text" id="poemTitle" placeholder="Poem Title" required>
-            <input type="text" id="poemAuthor" placeholder="Author Name" required>
-            <textarea id="poemText" placeholder="Write your verses here..." required></textarea>
+            <input type="text" id="poemTitle" placeholder="Title of your verse" required>
+            <input type="text" id="poemAuthor" placeholder="Author name" required>
+            <textarea id="poemText" placeholder="Write your poem here..." required></textarea>
+            <div class="is-public-wrap">
+                <input type="checkbox" id="isPublicPoem">
+                <label for="isPublicPoem">Publish to Cosmic Library</label>
+            </div>
             <button type="submit" id="submitBtn">Add Poem</button>
         </form>
 
-        <div class="poem-grid" id="customPoemGrid">
-            <!-- Custom poems will be injected here -->
+        <div id="customPoemGrid" class="poem-grid">
+            <!-- User poems will be rendered here -->
         </div>
     </section>
+
+    <div class="cosmos-divider"></div>
+
+    <!-- ===== INTERACTIVE MAP ===== -->
+    <section id="constellations" class="space-sec">
+        <div class="section-title">✦ Interactive Map ✦</div>
+        <p class="section-sub">Click on stars to discover hidden verses in the sky</p>
+        <div class="constellation-map" id="constellationMap">
+            <!-- Interactive stars will be added here -->
+        </div>
+    </section>
+
+    <div class="cosmos-divider"></div>
 
     <!-- AUTH MODAL -->
     <div id="authModal" class="auth-modal">
@@ -1803,10 +2005,14 @@
         // CUSTOM POEMS LOGIC
         const poemForm = document.getElementById('customPoemForm');
         const poemGrid = document.getElementById('customPoemGrid');
+        const publicPoemGrid = document.getElementById('publicPoemGrid');
         const submitBtn = document.getElementById('submitBtn');
         const loginBtn = document.getElementById('loginBtn');
+        const userStatsWrap = document.getElementById('userStatsWrap');
+        
         let currentUser = localStorage.getItem('celestialVerses_user') || null;
         let customPoems = [];
+        let publicPoems = [];
         const API_BASE = window.location.origin;
 
         async function loadPoems() {
@@ -1816,24 +2022,54 @@
                     if (res.ok) {
                         customPoems = await res.json();
                         renderPoems();
+                        updateUserStats();
                     }
-                } catch (e) {
-                    console.error("Failed to load poems", e);
-                    customPoems = [];
-                }
+                } catch (e) { console.error(e); }
             } else {
                 customPoems = [];
                 renderPoems();
             }
         }
 
+        async function loadPublicPoems() {
+            try {
+                const res = await fetch(`${API_BASE}/public-poems`);
+                if (res.ok) {
+                    publicPoems = await res.json();
+                    renderPublicPoems();
+                    initConstellationMap();
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function updateUserStats() {
+            if (!currentUser) return;
+            try {
+                const res = await fetch(`${API_BASE}/user-stats?username=${encodeURIComponent(currentUser)}`);
+                if (res.ok) {
+                    const stats = await res.json();
+                    document.getElementById('userStats').textContent = `${stats.count} Poems · ${stats.stars} Stars`;
+                    userStatsWrap.style.display = 'flex';
+                    
+                    // Titles based on count
+                    let title = "Stardust Wanderer";
+                    if(stats.count >= 5) title = "Nova Architect";
+                    if(stats.count >= 15) title = "Galaxy Weaver";
+                    if(stats.count >= 30) title = "Universal Sage";
+                    document.getElementById('userBadge').textContent = title;
+                }
+            } catch(e) {}
+        }
+
         function updateAuthUI() {
             if (currentUser) {
                 loginBtn.textContent = `Logout (${currentUser})`;
                 poemForm.style.display = 'flex';
+                userStatsWrap.style.display = 'flex';
             } else {
                 loginBtn.textContent = 'Login';
                 poemForm.style.display = 'none';
+                userStatsWrap.style.display = 'none';
             }
         }
 
@@ -1882,12 +2118,6 @@
             e.preventDefault();
             const username = document.getElementById('authUsername').value.trim();
             const password = document.getElementById('authPassword').value;
-            
-            if (!username || !password) {
-                authError.textContent = 'Please fill all fields.';
-                return;
-            }
-
             const endpoint = isSignUpMode ? '/signup' : '/login';
             try {
                 authSubmit.disabled = true;
@@ -1896,19 +2126,14 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password })
                 });
-                
                 const data = await res.json();
-                
                 if (!res.ok) {
-                    authError.textContent = data.error || 'Authentication failed.';
+                    authError.textContent = data.error || 'Failed.';
                 } else {
                     loginUser(username);
                 }
-            } catch (e) {
-                authError.textContent = 'Network error. Backend might be offline.';
-            } finally {
-                authSubmit.disabled = false;
-            }
+            } catch (e) { authError.textContent = 'Network error.'; }
+            finally { authSubmit.disabled = false; }
         });
 
         function loginUser(username) {
@@ -1922,14 +2147,12 @@
         loginBtn.addEventListener('click', (e) => {
             e.preventDefault();
             if (currentUser) {
-                // Logout
                 currentUser = null;
                 localStorage.removeItem('celestialVerses_user');
                 customPoems = [];
                 updateAuthUI();
                 renderPoems();
             } else {
-                // Login
                 openAuthModal();
             }
         });
@@ -1949,7 +2172,7 @@
                 div.className = 'poem-card fade-up';
                 div.setAttribute('data-tilt', 'true');
                 div.innerHTML = `
-                    <span class="poem-tag">Yours</span>
+                    <span class="poem-tag" style="color:var(--rose)">${poem.is_public ? 'Public' : 'Private'}</span>
                     <div class="poem-title">${escapeHTML(poem.title)}</div>
                     <div class="poem-author">${escapeHTML(poem.author)}</div>
                     <div class="poem-text">${escapeHTML(poem.text)}</div>
@@ -1960,33 +2183,161 @@
                     </div>
                 `;
                 poemGrid.appendChild(div);
-                if (typeof observer !== 'undefined') {
-                    observer.observe(div);
-                }
-                
-                // Re-bind tilt effect for new cards
-                div.addEventListener('mousemove', e => {
-                    const r = div.getBoundingClientRect();
-                    const x = (e.clientX - r.left) / r.width - .5;
-                    const y = (e.clientY - r.top) / r.height - .5;
-                    div.style.transform = `translateY(-8px) rotateX(${-y * 10}deg) rotateY(${x * 10}deg)`;
-                    div.style.setProperty('--mx', e.clientX - r.left + 'px');
-                    div.style.setProperty('--my', e.clientY - r.top + 'px');
-                });
-                div.addEventListener('mouseleave', () => {
-                    div.style.transform = '';
-                });
+                bindCardEffects(div);
             });
+            bindActions();
+        }
 
-            document.querySelectorAll('.edit-btn').forEach(btn => {
-                btn.addEventListener('click', () => editPoem(btn.dataset.id));
+        function renderPublicPoems() {
+            publicPoemGrid.innerHTML = '';
+            publicPoems.forEach(poem => {
+                const div = document.createElement('div');
+                div.className = 'poem-card fade-up';
+                div.setAttribute('data-tilt', 'true');
+                div.innerHTML = `
+                    <span class="poem-tag" style="color:var(--teal)">Cosmic Library</span>
+                    <div class="poem-title">${escapeHTML(poem.title)}</div>
+                    <div class="poem-author">${escapeHTML(poem.author)} (@${poem.username})</div>
+                    <div class="poem-text">${escapeHTML(poem.text)}</div>
+                    <div class="poem-actions">
+                        <button type="button" class="action-btn star-btn" data-id="${poem.id}">⭐ ${poem.star_count || 0}</button>
+                        <button type="button" class="action-btn share-btn" data-id="${poem.id}">Share</button>
+                    </div>
+                `;
+                publicPoemGrid.appendChild(div);
+                bindCardEffects(div);
+                observer.observe(div);
             });
-            document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', () => deletePoem(btn.dataset.id));
+            
+            document.querySelectorAll('.star-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    if(!currentUser) return openAuthModal();
+                    const res = await fetch(`${API_BASE}/poems/${btn.dataset.id}/star`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username: currentUser })
+                    });
+                    if(res.ok) loadPublicPoems();
+                });
             });
-            document.querySelectorAll('.share-btn').forEach(btn => {
-                btn.addEventListener('click', () => sharePoem(btn.dataset.id));
+        }
+
+        function bindCardEffects(div) {
+            div.addEventListener('mousemove', e => {
+                const r = div.getBoundingClientRect();
+                const x = (e.clientX - r.left) / r.width - .5;
+                const y = (e.clientY - r.top) / r.height - .5;
+                div.style.transform = `translateY(-8px) rotateX(${-y * 10}deg) rotateY(${x * 10}deg)`;
+                div.style.setProperty('--mx', e.clientX - r.left + 'px');
+                div.style.setProperty('--my', e.clientY - r.top + 'px');
             });
+            div.addEventListener('mouseleave', () => { div.style.transform = ''; });
+        }
+
+        function bindActions() {
+            document.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', () => editPoem(btn.dataset.id)));
+            document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', () => deletePoem(btn.dataset.id)));
+            document.querySelectorAll('.share-btn').forEach(btn => btn.addEventListener('click', () => sharePoem(btn.dataset.id)));
+        }
+
+        // MOON PHASE LOGIC
+        function getMoonPhase() {
+            const date = new Date();
+            let year = date.getFullYear();
+            let month = date.getMonth() + 1;
+            let day = date.getDate();
+            if (month < 3) { year--; month += 12; }
+            let c = 365.25 * year;
+            let e = 30.6 * month;
+            let jd = c + e + day - 694039.09;
+            jd /= 29.5305882;
+            let b = parseInt(jd);
+            jd -= b;
+            return jd; // 0 to 1
+        }
+
+        function initMoonPhase() {
+            const phase = getMoonPhase();
+            const shadow = document.getElementById('moonShadow');
+            const name = document.getElementById('moonPhaseName');
+            let offset = 0;
+            let phaseName = "";
+            
+            if (phase < 0.06 || phase > 0.94) { phaseName = "New Moon"; offset = 100; }
+            else if (phase < 0.19) { phaseName = "Waxing Crescent"; offset = 70; }
+            else if (phase < 0.31) { phaseName = "First Quarter"; offset = 50; }
+            else if (phase < 0.44) { phaseName = "Waxing Gibbous"; offset = 20; }
+            else if (phase < 0.56) { phaseName = "Full Moon"; offset = 0; }
+            else if (phase < 0.69) { phaseName = "Waning Gibbous"; offset = -20; }
+            else if (phase < 0.81) { phaseName = "Last Quarter"; offset = -50; }
+            else { phaseName = "Waning Crescent"; offset = -70; }
+            
+            shadow.style.left = offset + "%";
+            name.textContent = phaseName;
+        }
+
+        // AMBIENT PLAYER LOGIC
+        let currentAudio = null;
+        document.querySelectorAll('.audio-btn[data-src]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if(currentAudio) currentAudio.pause();
+                document.querySelectorAll('.audio-btn').forEach(b => b.classList.remove('active'));
+                currentAudio = new Audio(btn.dataset.src);
+                currentAudio.loop = true;
+                currentAudio.play();
+                btn.classList.add('active');
+            });
+        });
+        document.getElementById('stopAudio').addEventListener('click', () => {
+            if(currentAudio) currentAudio.pause();
+            document.querySelectorAll('.audio-btn').forEach(b => b.classList.remove('active'));
+        });
+
+        // AI ASSISTANT LOGIC
+        document.getElementById('aiSuggestBtn').addEventListener('click', async () => {
+            const title = document.getElementById('poemTitle').value || 'Stars';
+            const suggestionEl = document.getElementById('aiSuggestion');
+            suggestionEl.textContent = "Asking the stars...";
+            try {
+                const res = await fetch(`${API_BASE}/generate-poem`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ keyword: title })
+                });
+                if(res.ok) {
+                    const data = await res.json();
+                    suggestionEl.textContent = data.suggestion;
+                }
+            } catch(e) { suggestionEl.textContent = "The stars are silent."; }
+        });
+
+        // CONSTELLATION MAP LOGIC
+        function initConstellationMap() {
+            const map = document.getElementById('constellationMap');
+            map.innerHTML = '';
+            const count = Math.min(publicPoems.length, 12);
+            for(let i=0; i<count; i++) {
+                const star = document.createElement('div');
+                star.className = 'map-star';
+                const x = 10 + Math.random() * 80;
+                const y = 10 + Math.random() * 80;
+                star.style.left = x + '%';
+                star.style.top = y + '%';
+                
+                const label = document.createElement('div');
+                label.className = 'map-label';
+                label.textContent = publicPoems[i].title;
+                label.style.left = (x + 2) + '%';
+                label.style.top = y + '%';
+                
+                star.addEventListener('click', () => {
+                    const el = document.querySelector(`.public-library-sec .poem-title`);
+                    el.scrollIntoView({ behavior: 'smooth' });
+                });
+                
+                map.appendChild(star);
+                map.appendChild(label);
+            }
         }
 
         function escapeHTML(str) {
@@ -2008,42 +2359,32 @@
             const title = document.getElementById('poemTitle').value;
             const author = document.getElementById('poemAuthor').value;
             const text = document.getElementById('poemText').value;
+            const isPublic = document.getElementById('isPublicPoem').checked;
 
             submitBtn.disabled = true;
             try {
                 if (idInput) {
-                    // Edit
                     const res = await fetch(`${API_BASE}/poems/${idInput}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username: currentUser, title, author, text })
+                        body: JSON.stringify({ username: currentUser, title, author, text, is_public: isPublic })
                     });
                     if(res.ok) {
-                        const updated = await res.json();
-                        const index = customPoems.findIndex(p => p.id === idInput);
-                        if(index > -1) customPoems[index] = updated;
                         submitBtn.textContent = 'Add Poem';
                     }
                 } else {
-                    // Add
                     const res = await fetch(`${API_BASE}/poems`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username: currentUser, title, author, text })
+                        body: JSON.stringify({ username: currentUser, title, author, text, is_public: isPublic })
                     });
-                    if(res.ok) {
-                        const added = await res.json();
-                        customPoems.unshift(added);
-                    }
                 }
-                renderPoems();
+                loadPoems();
+                loadPublicPoems();
                 poemForm.reset();
                 document.getElementById('poemId').value = '';
-            } catch(err) {
-                alert('Failed to save poem.');
-            } finally {
-                submitBtn.disabled = false;
-            }
+            } catch(err) { alert('Failed to save poem.'); }
+            finally { submitBtn.disabled = false; }
         });
 
         function editPoem(id) {
@@ -2053,6 +2394,7 @@
                 document.getElementById('poemTitle').value = poem.title;
                 document.getElementById('poemAuthor').value = poem.author;
                 document.getElementById('poemText').value = poem.text;
+                document.getElementById('isPublicPoem').checked = poem.is_public;
                 submitBtn.textContent = 'Update Poem';
                 document.getElementById('personal-space').scrollIntoView({ behavior: 'smooth' });
             }
@@ -2064,15 +2406,8 @@
                     const res = await fetch(`${API_BASE}/poems/${id}?username=${encodeURIComponent(currentUser)}`, {
                         method: 'DELETE'
                     });
-                    if(res.ok) {
-                        customPoems = customPoems.filter(p => p.id !== id);
-                        renderPoems();
-                    } else {
-                        alert('Failed to delete poem.');
-                    }
-                } catch(e) {
-                    alert('Network error.');
-                }
+                    if(res.ok) { loadPoems(); loadPublicPoems(); }
+                } catch(e) { alert('Network error.'); }
             }
         }
 
@@ -2123,7 +2458,10 @@
 
         // Initial render
         loadPoems();
+        loadPublicPoems();
         updateAuthUI();
+        initMoonPhase();
+        displayDailyQuote();
     </script>
 </body>
 
