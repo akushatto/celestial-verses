@@ -18,9 +18,9 @@
     
     <nav>
         <a href="/">Home</a>
-        <a href="/library">Cosmic Library</a>
-        <a href="/dashboard">Dashboard</a>
-        <a href="/about">About</a>
+        <a href="/library.html">Cosmic Library</a>
+        <a href="/dashboard.html">Dashboard</a>
+        <a href="/about.html">About</a>
         <div id="loginBtn" style="color: var(--gold); border-left: 1px solid rgba(255,255,255,0.1); padding-left: 1rem; cursor: pointer;">Login</div>
         <div class="moon-widget">
             <div class="moon-phase-icon"><div id="moonShadow" class="moon-shadow"></div></div>
@@ -31,8 +31,10 @@
 
     <!-- AMBIENT PLAYER -->
     <div class="ambient-player">
-        <button class="audio-btn" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3">Space Ambience</button>
-        <button class="audio-btn" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3">Lunar Echoes</button>
+        <button class="audio-btn" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3">Space
+            Ambience</button>
+        <button class="audio-btn" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3">Lunar
+            Echoes</button>
         <button class="audio-btn" id="stopAudio">Mute</button>
     </div>
 
@@ -65,7 +67,8 @@
 
         <div id="unauthMessage" style="text-align: center; margin-top: 3rem;">
             <p style="opacity: 0.6; margin-bottom: 1.5rem;">Please login to access your private dashboard.</p>
-            <button onclick="openAuthModal()" class="action-btn" style="padding: 1rem 2rem; font-size: 0.8rem;">Access Your Space</button>
+            <button onclick="openAuthModal()" class="action-btn" style="padding: 1rem 2rem; font-size: 0.8rem;">Access
+                Your Space</button>
         </div>
 
         <div id="dashboardWrap" class="dashboard-container" style="display: none;">
@@ -112,7 +115,8 @@
                         <div class="insight-label">Published Poems</div>
                     </div>
                 </div>
-                <div id="mostViewedPoem" style="background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px;">
+                <div id="mostViewedPoem"
+                    style="background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px;">
                     <div class="insight-label" style="margin-bottom: 0.5rem;">Most Viewed Verse</div>
                     <h3 id="top-poem-title" style="font-family: 'Cinzel'; color: var(--gold);">None yet</h3>
                 </div>
@@ -121,7 +125,8 @@
             <!-- PROFILE TAB -->
             <div id="tab-profile" class="dashboard-view">
                 <div class="profile-header">
-                    <img id="userAvatar" src="https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Star" class="profile-avatar">
+                    <img id="userAvatar" src="https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Star"
+                        class="profile-avatar">
                     <div>
                         <div id="userBadge" class="user-badge">Stardust Wanderer</div>
                         <div id="userHandle" style="color: var(--silver); opacity: 0.6;">@username</div>
@@ -129,7 +134,8 @@
                 </div>
                 <form id="profileForm" class="poem-form" style="max-width: 100%; border: none; padding: 0;">
                     <label class="insight-label">Your Bio</label>
-                    <textarea id="userBio" placeholder="Tell the stars about yourself..." style="min-height: 80px;"></textarea>
+                    <textarea id="userBio" placeholder="Tell the stars about yourself..."
+                        style="min-height: 80px;"></textarea>
                     <label class="insight-label">Choose Your Avatar</label>
                     <div class="avatar-options" id="avatarPicker">
                         <!-- Avatars will be injected here -->
@@ -142,7 +148,8 @@
             <div id="tab-settings" class="dashboard-view" style="text-align: center;">
                 <h3 class="section-title" style="font-size: 1.2rem;">Account Settings</h3>
                 <p style="opacity: 0.6; margin-bottom: 2rem;">Manage your celestial connection</p>
-                <button onclick="logoutUser()" class="action-btn" style="border-color: var(--rose); color: var(--rose);">Logout of This Universe</button>
+                <button onclick="logoutUser()" class="action-btn"
+                    style="border-color: var(--rose); color: var(--rose);">Logout of This Universe</button>
             </div>
         </div>
     </section>
@@ -158,7 +165,8 @@
                 <textarea id="feedbackMsg" placeholder="Your thoughts..." required></textarea>
                 <button type="submit">Submit Feedback</button>
             </form>
-            <p id="feedbackConfirm" style="color: var(--teal); font-size: 0.9rem; margin-top: 1rem; display: none;">✨ Feedback sent to the stars!</p>
+            <p id="feedbackConfirm" style="color: var(--teal); font-size: 0.9rem; margin-top: 1rem; display: none;">✨
+                Feedback sent to the stars!</p>
         </div>
     </section>
 
@@ -186,7 +194,7 @@
                 <button type="submit" id="authSubmit">Login</button>
             </form>
             <p class="auth-toggle">
-                <span id="authToggleText">New here?</span> 
+                <span id="authToggleText">New here?</span>
                 <a href="#" id="authToggleBtn">Sign Up</a>
             </p>
             <button class="auth-close" id="authClose">×</button>

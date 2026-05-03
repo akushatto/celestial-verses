@@ -112,7 +112,7 @@
         let currentUser = localStorage.getItem('celestialVerses_user') || null;
         let customPoems = [];
         let publicPoems = [];
-        const API_BASE = window.location.origin;
+        const API_BASE = window.location.origin + "/api";
 
         async function loadPoems() {
             if (currentUser) {
