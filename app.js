@@ -47,7 +47,7 @@
                 card.style.transform = `translateY(-8px) rotateX(${-y * 10}deg) rotateY(${x * 10}deg)`;
                 card.style.setProperty('--mx', e.clientX - r.left + 'px');
                 card.style.setProperty('--my', e.clientY - r.top + 'px');
-                card.querySelector('.poem-card::before');
+                // Removed invalid pseudo-element query
             });
             card.addEventListener('mouseleave', () => {
                 card.style.transform = '';
@@ -287,14 +287,21 @@
         }
 
         function updateAuthUI() {
+            const dashboard = document.getElementById('dashboardWrap');
+            const unauth = document.getElementById('unauthMessage');
             if (currentUser) {
                 if (loginBtn) loginBtn.textContent = `Logout (${currentUser})`;
                 if (poemForm) poemForm.style.display = 'flex';
                 if (userStatsWrap) userStatsWrap.style.display = 'flex';
+                if (dashboard) dashboard.style.display = 'block';
+                if (unauth) unauth.style.display = 'none';
+                if (typeof loadProfile === 'function') loadProfile();
             } else {
                 if (loginBtn) loginBtn.textContent = 'Login';
                 if (poemForm) poemForm.style.display = 'none';
                 if (userStatsWrap) userStatsWrap.style.display = 'none';
+                if (dashboard) dashboard.style.display = 'none';
+                if (unauth) unauth.style.display = 'block';
             }
         }
 
@@ -451,15 +458,18 @@
             });
             publicPoemGrid.appendChild(fragment);
         function bindActions() {
+            // Public Actions
             document.querySelectorAll('.star-btn').forEach(btn => {
                 btn.addEventListener('click', async () => {
                     if(!currentUser) return openAuthModal();
-                    const res = await fetch(`${API_BASE}/poems/${btn.dataset.id}/star`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username: currentUser })
-                    });
-                    if(res.ok) loadPublicPoems();
+                    try {
+                        const res = await fetch(`${API_BASE}/poems/${btn.dataset.id}/star`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ username: currentUser })
+                        });
+                        if(res.ok) loadPublicPoems();
+                    } catch(e) {}
                 });
             });
 
@@ -467,7 +477,14 @@
                 btn.addEventListener('click', () => followUser(btn.dataset.user));
             });
 
+            // My Constellations Actions
+            document.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', () => editPoem(btn.dataset.id)));
+            document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', () => deletePoem(btn.dataset.id)));
+            document.querySelectorAll('.share-btn').forEach(btn => btn.addEventListener('click', () => sharePoem(btn.dataset.id)));
+            
+            // Interaction buttons
             document.querySelectorAll('.comment-btn').forEach(btn => {
+
                 btn.addEventListener('click', async () => {
                     const sec = document.getElementById(`comments-${btn.dataset.id}`);
                     if(sec.style.display === 'none') {
@@ -535,11 +552,7 @@
             div.addEventListener('mouseleave', () => { div.style.transform = ''; });
         }
 
-        function bindActions() {
-            document.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', () => editPoem(btn.dataset.id)));
-            document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', () => deletePoem(btn.dataset.id)));
-            document.querySelectorAll('.share-btn').forEach(btn => btn.addEventListener('click', () => sharePoem(btn.dataset.id)));
-        }
+
 
         // MOON PHASE LOGIC
         function getMoonPhase() {
@@ -864,21 +877,7 @@
             location.reload(); // Refresh to clear states
         }
 
-        // UPDATE AUTH UI override
-        function updateAuthUI() {
-            const dashboard = document.getElementById('dashboardWrap');
-            const unauth = document.getElementById('unauthMessage');
-            if (currentUser) {
-                if (loginBtn) loginBtn.textContent = `Logout (${currentUser})`;
-                if (dashboard) dashboard.style.display = 'block';
-                if (unauth) unauth.style.display = 'none';
-                loadProfile();
-            } else {
-                if (loginBtn) loginBtn.textContent = 'Login';
-                if (dashboard) dashboard.style.display = 'none';
-                if (unauth) unauth.style.display = 'block';
-            }
-        }
+
 
         // Initial render
         loadPoems();
