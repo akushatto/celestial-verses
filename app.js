@@ -654,25 +654,7 @@
             });
         });
 
-        // PROFILE & AVATAR PICKER
-        const avatars = [
-            'Star', 'Sun', 'Moon', 'Eclipse', 'Comet', 'Nova', 'Nebula', 'Galaxy'
-        ];
-        function renderAvatarPicker() {
-            const picker = document.getElementById('avatarPicker');
-            picker.innerHTML = '';
-            avatars.forEach(name => {
-                const img = document.createElement('img');
-                img.src = `https://api.dicebear.com/7.x/bottts-neutral/svg?seed=${name}`;
-                img.className = 'avatar-opt';
-                img.onclick = () => {
-                    document.querySelectorAll('.avatar-opt').forEach(a => a.classList.remove('selected'));
-                    img.classList.add('selected');
-                    document.getElementById('userAvatar').src = img.src;
-                };
-                picker.appendChild(img);
-            });
-        }
+        // OLD AVATAR PICKER REMOVED (Replaced by Gamified Profile)
 
         async function loadProfile() {
             if(!currentUser) return;
@@ -774,7 +756,6 @@
         updateAuthUI();
         initMoonPhase();
         displayDailyQuote();
-        renderAvatarPicker();
     
 // SEARCH LOGIC
 const searchBtn = document.getElementById('searchBtn');
