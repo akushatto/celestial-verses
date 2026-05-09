@@ -149,28 +149,30 @@
                 const res = await fetch(`${API_BASE}/user-stats?username=${encodeURIComponent(currentUser)}`);
                 if (res.ok) {
                     const stats = await res.json();
-                    document.getElementById('userStats').textContent = `${stats.count} Poems · ${stats.stars} Stars`;
-                    userStatsWrap.style.display = 'flex';
+                    const userStatsEl = document.getElementById('userStats');
+                    if (userStatsEl) userStatsEl.textContent = `${stats.count} Poems · ${stats.stars} Stars`;
+                    if (userStatsWrap) userStatsWrap.style.display = 'flex';
                     
                     // Titles based on count
                     let title = "Stardust Wanderer";
                     if(stats.count >= 5) title = "Nova Architect";
                     if(stats.count >= 15) title = "Galaxy Weaver";
                     if(stats.count >= 30) title = "Universal Sage";
-                    document.getElementById('userBadge').textContent = title;
+                    const userBadgeEl = document.getElementById('userBadge');
+                    if (userBadgeEl) userBadgeEl.textContent = title;
                 }
             } catch(e) {}
         }
 
         function updateAuthUI() {
             if (currentUser) {
-                loginBtn.textContent = `Logout (${currentUser})`;
-                poemForm.style.display = 'flex';
-                userStatsWrap.style.display = 'flex';
+                if (loginBtn) loginBtn.textContent = `Logout (${currentUser})`;
+                if (poemForm) poemForm.style.display = 'flex';
+                if (userStatsWrap) userStatsWrap.style.display = 'flex';
             } else {
-                loginBtn.textContent = 'Login';
-                poemForm.style.display = 'none';
-                userStatsWrap.style.display = 'none';
+                if (loginBtn) loginBtn.textContent = 'Login';
+                if (poemForm) poemForm.style.display = 'none';
+                if (userStatsWrap) userStatsWrap.style.display = 'none';
             }
         }
 
@@ -245,18 +247,20 @@
             closeAuthModal();
         }
 
-        loginBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (currentUser) {
-                currentUser = null;
-                localStorage.removeItem('celestialVerses_user');
-                customPoems = [];
-                updateAuthUI();
-                renderPoems();
-            } else {
-                openAuthModal();
-            }
-        });
+        if (loginBtn) {
+            loginBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentUser) {
+                    currentUser = null;
+                    localStorage.removeItem('celestialVerses_user');
+                    customPoems = [];
+                    updateAuthUI();
+                    renderPoems();
+                } else {
+                    openAuthModal();
+                }
+            });
+        }
 
         function renderPoems() {
             if(!poemGrid) return;
