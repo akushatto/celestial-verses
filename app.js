@@ -819,7 +819,218 @@ async function followUser(followingUser) {
     alert(data.status === 'followed' ? `You are now following ${followingUser}` : `Unfollowed ${followingUser}`);
 }
 
-// --- NEW FEATURES LOGIC ---
+// --- SIDEBAR INJECTION & LOGIC ---
+function initSidebar() {
+    const nav = document.querySelector('nav');
+    if(!nav) return;
+
+    // Hamburger
+    const hamburger = document.createElement('div');
+    hamburger.className = 'hamburger';
+    hamburger.innerHTML = '<span></span><span></span><span></span>';
+    nav.insertBefore(hamburger, nav.firstChild);
+
+    // Sidebar
+    const sidebar = document.createElement('aside');
+    sidebar.id = 'sidebar';
+    sidebar.className = 'sidebar';
+    sidebar.innerHTML = `
+        <div class="sidebar-header">
+            <div class="sidebar-profile-glow" id="sidebarAura"></div>
+            <img src="https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Star" id="sidebarAvatar" class="sidebar-avatar">
+            <div class="sidebar-user-info">
+                <div id="sidebarUsername" class="sidebar-username">${currentUser || 'Guest Stargazer'}</div>
+                <div id="sidebarBadgeTop" class="sidebar-badge" style="font-size:0.8rem; color:var(--silver);">${currentUser ? 'Wanderer' : 'Not Logged In'}</div>
+            </div>
+            <div class="sidebar-stats" style="${currentUser ? '' : 'display:none;'}">
+                <div><span id="sidebarPoemsStat">0</span> Verses</div>
+                <div><span id="sidebarStarsStat">0</span> Stars</div>
+            </div>
+        </div>
+        <div class="sidebar-nav">
+            <a href="index.html">🏠 Home Base</a>
+            <a href="library.html">📖 Cosmic Library</a>
+            <a href="dashboard.html">🌠 My Constellations</a>
+            <a href="#" id="sidebarSavedBtn">🔖 Saved Verses</a>
+        </div>
+        <div class="sidebar-footer">
+            <button id="sidebarEclipseToggle">🌑 Eclipse Mode</button>
+            ${currentUser ? '<button id="sidebarLogout" style="color: var(--rose);">🚪 Leave Universe</button>' : '<button id="sidebarLogin">🗝️ Login</button>'}
+        </div>
+    `;
+    document.body.appendChild(sidebar);
+
+    const overlay = document.createElement('div');
+    overlay.className = 'sidebar-overlay';
+    document.body.appendChild(overlay);
+
+    hamburger.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+        hamburger.classList.toggle('active');
+        if (sidebar.classList.contains('active')) updateSidebarStats();
+    });
+    
+    overlay.addEventListener('click', () => {
+        sidebar.classList.remove('active');
+        overlay.classList.remove('active');
+        hamburger.classList.remove('active');
+    });
+
+    const logoutBtn = document.getElementById('sidebarLogout');
+    if (logoutBtn) logoutBtn.addEventListener('click', logoutUser);
+    
+    const loginBtn = document.getElementById('sidebarLogin');
+    if (loginBtn) loginBtn.addEventListener('click', openAuthModal);
+    
+    document.getElementById('sidebarEclipseToggle').addEventListener('click', () => {
+        document.body.style.background = document.body.style.background === 'var(--pale)' ? 'var(--deep)' : 'var(--pale)';
+        document.body.style.color = document.body.style.background === 'var(--pale)' ? 'var(--deep)' : 'var(--pale)';
+    });
+}
+initSidebar();
+
+async function updateSidebarStats() {
+    if(!currentUser) return;
+    try {
+        const res = await fetch(`${API_BASE}/user-stats?username=${encodeURIComponent(currentUser)}`);
+        if (res.ok) {
+            const stats = await res.json();
+            document.getElementById('sidebarPoemsStat').textContent = stats.count;
+            document.getElementById('sidebarStarsStat').textContent = stats.stars;
+            // Update gamified title
+            const energy = (stats.count * 50) + (stats.stars * 10);
+            const level = Math.floor(energy / 200) + 1;
+            let title = "Stardust Wanderer";
+            if(level >= 2) title = "Nova Architect";
+            if(level >= 4) title = "Galaxy Weaver";
+            if(level >= 7) title = "Universal Sage";
+            document.getElementById('sidebarBadgeTop').textContent = `Lv.${level} ${title}`;
+            
+            // Sync Aura if loaded
+            const storedAura = localStorage.getItem('celestial_aura') || 'var(--gold)';
+            document.getElementById('sidebarAura').style.background = storedAura;
+            const storedAvatar = localStorage.getItem('celestial_avatar') || 'Star';
+            document.getElementById('sidebarAvatar').src = `https://api.dicebear.com/7.x/bottts-neutral/svg?seed=${storedAvatar}`;
+        }
+    } catch(e) {}
+}
+
+// --- GAMIFIED PROFILE ---
+function initGamifiedProfile() {
+    if(!document.getElementById('userLevel')) return; // Only on dashboard
+    updateGamifiedProfileStats();
+}
+
+async function updateGamifiedProfileStats() {
+    if(!currentUser) return;
+    try {
+        const res = await fetch(`${API_BASE}/user-stats?username=${encodeURIComponent(currentUser)}`);
+        if (res.ok) {
+            const stats = await res.json();
+            const energy = (stats.count * 50) + (stats.stars * 10);
+            const level = Math.floor(energy / 200) + 1;
+            const nextLevelEnergy = level * 200;
+            const progressPct = ((energy % 200) / 200) * 100;
+            
+            document.getElementById('energyCount').textContent = energy;
+            document.getElementById('nextLevelEnergy').textContent = nextLevelEnergy;
+            document.getElementById('userLevel').textContent = level;
+            document.getElementById('energyFill').style.width = `${progressPct}%`;
+            
+            let title = "Stardust Wanderer";
+            if(level >= 2) title = "Nova Architect";
+            if(level >= 4) title = "Galaxy Weaver";
+            if(level >= 7) title = "Universal Sage";
+            document.getElementById('userBadge').textContent = `Lv.${level} ${title}`;
+            
+            renderGamifiedAvatars(level);
+            renderGamifiedAuras(level);
+        }
+    } catch(e) {}
+}
+
+const allAvatars = [
+    { seed: 'Star', level: 1 }, { seed: 'Sun', level: 1 }, { seed: 'Moon', level: 2 }, 
+    { seed: 'Eclipse', level: 2 }, { seed: 'Comet', level: 3 }, { seed: 'Nova', level: 4 }, 
+    { seed: 'Nebula', level: 5 }, { seed: 'Galaxy', level: 7 }
+];
+
+function renderGamifiedAvatars(userLevel) {
+    const picker = document.getElementById('avatarPicker');
+    if(!picker) return;
+    picker.innerHTML = '';
+    const storedAvatar = localStorage.getItem('celestial_avatar') || 'Star';
+    document.getElementById('userAvatar').src = `https://api.dicebear.com/7.x/bottts-neutral/svg?seed=${storedAvatar}`;
+    
+    allAvatars.forEach(av => {
+        const wrap = document.createElement('div');
+        wrap.className = 'avatar-opt-wrap';
+        wrap.title = `Level ${av.level} Required`;
+        const isLocked = userLevel < av.level;
+        
+        wrap.innerHTML = `
+            <img src="https://api.dicebear.com/7.x/bottts-neutral/svg?seed=${av.seed}" class="avatar-opt ${isLocked ? 'locked' : ''} ${storedAvatar === av.seed ? 'selected' : ''}">
+            ${isLocked ? '<div class="lock-icon">🔒</div>' : ''}
+        `;
+        
+        if (!isLocked) {
+            wrap.onclick = () => {
+                document.querySelectorAll('.avatar-opt').forEach(a => a.classList.remove('selected'));
+                wrap.querySelector('.avatar-opt').classList.add('selected');
+                document.getElementById('userAvatar').src = `https://api.dicebear.com/7.x/bottts-neutral/svg?seed=${av.seed}`;
+                localStorage.setItem('celestial_avatar', av.seed);
+                updateSidebarStats();
+            };
+        } else {
+            wrap.onclick = () => alert(`Reach Level ${av.level} to unlock the ${av.seed} avatar! Keep writing and collecting stars.`);
+        }
+        picker.appendChild(wrap);
+    });
+}
+
+const allAuras = [
+    { color: 'var(--gold)', level: 1, name: 'Golden Sun' },
+    { color: 'var(--silver)', level: 1, name: 'Lunar Silver' },
+    { color: 'var(--teal)', level: 2, name: 'Nebula Teal' },
+    { color: 'var(--rose)', level: 3, name: 'Stardust Rose' },
+    { color: '#ff9f43', level: 5, name: 'Solar Flare' },
+    { color: '#d4c5f0', level: 7, name: 'Cosmic Void' }
+];
+
+function renderGamifiedAuras(userLevel) {
+    const picker = document.getElementById('auraPicker');
+    if(!picker) return;
+    picker.innerHTML = '';
+    const storedAura = localStorage.getItem('celestial_aura') || 'var(--gold)';
+    document.getElementById('userAuraRing').style.background = `linear-gradient(135deg, ${storedAura}, transparent, ${storedAura})`;
+    
+    allAuras.forEach(aura => {
+        const isLocked = userLevel < aura.level;
+        const opt = document.createElement('div');
+        opt.className = `aura-opt ${isLocked ? 'locked' : ''} ${storedAura === aura.color ? 'active' : ''}`;
+        opt.style.background = aura.color;
+        opt.title = `${aura.name} (Lv. ${aura.level})`;
+        if(isLocked) opt.innerHTML = '<span style="position: absolute; top: -5px; right: -5px; font-size: 10px;">🔒</span>';
+        
+        if (!isLocked) {
+            opt.onclick = () => {
+                document.querySelectorAll('.aura-opt').forEach(a => a.classList.remove('active'));
+                opt.classList.add('active');
+                document.getElementById('userAuraRing').style.background = `linear-gradient(135deg, ${aura.color}, transparent, ${aura.color})`;
+                localStorage.setItem('celestial_aura', aura.color);
+                updateSidebarStats();
+            };
+        } else {
+            opt.onclick = () => alert(`Reach Level ${aura.level} to unlock the ${aura.name} aura!`);
+        }
+        picker.appendChild(opt);
+    });
+}
+
+// Call on load
+initGamifiedProfile();
+
 
 // 1. Inject Controls into existing poem cards
 function injectPoemControls() {

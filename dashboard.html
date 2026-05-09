@@ -125,24 +125,39 @@
 
             <!-- PROFILE TAB -->
             <div id="tab-profile" class="dashboard-view">
-                <div class="profile-header">
-                    <img id="userAvatar" src="https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Star"
-                        class="profile-avatar">
-                    <div>
-                        <div id="userBadge" class="user-badge">Stardust Wanderer</div>
-                        <div id="userHandle" style="color: var(--silver); opacity: 0.6;">@username</div>
+                <div class="gamified-profile-wrap">
+                    <div class="profile-header-gamified">
+                        <div class="avatar-ring" id="userAuraRing">
+                            <img id="userAvatar" src="https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Star" class="profile-avatar-large">
+                        </div>
+                        <div class="profile-info-gamified">
+                            <h2 id="userHandleDisplay" style="font-family: 'Cinzel'; color: var(--gold); margin-bottom: 0.2rem;">@username</h2>
+                            <div id="userBadge" class="user-badge" style="display: inline-block; margin-bottom: 1rem;">Stardust Wanderer</div>
+                            <div class="level-progress-wrap">
+                                <div class="level-label">Cosmic Energy: <span id="energyCount">0</span> / <span id="nextLevelEnergy">100</span> (Level <span id="userLevel">1</span>)</div>
+                                <div class="progress-bar-bg"><div class="progress-bar-fill" id="energyFill"></div></div>
+                                <div class="level-hint" style="font-size: 0.75rem; color: var(--silver); opacity: 0.7; margin-top: 0.4rem;">Earn energy by publishing poems & collecting stars!</div>
+                            </div>
+                        </div>
                     </div>
+
+                    <form id="profileForm" class="poem-form" style="max-width: 100%; border: none; padding: 0; margin-top: 2rem;">
+                        <label class="insight-label" style="font-size: 1.1rem; color: var(--gold); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; margin-bottom: 1rem; display: block;">Your Bio</label>
+                        <textarea id="userBio" placeholder="Tell the universe about your journey..." style="min-height: 80px;"></textarea>
+                        
+                        <label class="insight-label" style="font-size: 1.1rem; color: var(--gold); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; margin-bottom: 1rem; display: block; margin-top: 2rem;">Unlockable Avatars</label>
+                        <div class="avatar-options" id="avatarPicker">
+                            <!-- Avatars will be injected here -->
+                        </div>
+
+                        <label class="insight-label" style="font-size: 1.1rem; color: var(--gold); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; margin-bottom: 1rem; display: block; margin-top: 2rem;">Profile Aura (Theme Color)</label>
+                        <div class="aura-picker" id="auraPicker">
+                            <!-- Aura options injected by JS based on level -->
+                        </div>
+
+                        <button type="submit" class="action-btn" style="margin-top: 2rem; width: 100%; padding: 1rem; font-size: 1rem; background: rgba(201,168,76,0.1); border-color: var(--gold); color: var(--gold);">Save Cosmic Identity</button>
+                    </form>
                 </div>
-                <form id="profileForm" class="poem-form" style="max-width: 100%; border: none; padding: 0;">
-                    <label class="insight-label">Your Bio</label>
-                    <textarea id="userBio" placeholder="Tell the stars about yourself..."
-                        style="min-height: 80px;"></textarea>
-                    <label class="insight-label">Choose Your Avatar</label>
-                    <div class="avatar-options" id="avatarPicker">
-                        <!-- Avatars will be injected here -->
-                    </div>
-                    <button type="submit" class="action-btn" style="margin-top: 1rem;">Update Profile</button>
-                </form>
             </div>
 
             <!-- SETTINGS TAB -->
