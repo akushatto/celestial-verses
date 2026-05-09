@@ -739,14 +739,14 @@
             const dashboard = document.getElementById('dashboardWrap');
             const unauth = document.getElementById('unauthMessage');
             if (currentUser) {
-                loginBtn.textContent = `Logout (${currentUser})`;
-                dashboard.style.display = 'block';
-                unauth.style.display = 'none';
+                if (loginBtn) loginBtn.textContent = `Logout (${currentUser})`;
+                if (dashboard) dashboard.style.display = 'block';
+                if (unauth) unauth.style.display = 'none';
                 loadProfile();
             } else {
-                loginBtn.textContent = 'Login';
-                dashboard.style.display = 'none';
-                unauth.style.display = 'block';
+                if (loginBtn) loginBtn.textContent = 'Login';
+                if (dashboard) dashboard.style.display = 'none';
+                if (unauth) unauth.style.display = 'block';
             }
         }
 
