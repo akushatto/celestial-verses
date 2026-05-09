@@ -1407,13 +1407,14 @@
             gap: 5px;
             cursor: pointer;
             z-index: 2000;
-            width: 36px; height: 36px;
-            border-radius: 6px;
-            transition: background 0.3s;
+            width: 44px; height: 44px; /* Increased tap area for better mobile UX */
+            border-radius: 50%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             flex-shrink: 0;
-            margin-right: 0.5rem; /* Space between hamburger and logo */
+            position: relative;
+            z-index: 2100;
         }
-        .hamburger:hover { background: rgba(201,168,76,0.08); }
+        .hamburger:active { transform: scale(0.9); background: rgba(201,168,76,0.15); }
         .hamburger span {
             display: block;
             width: 20px; height: 1.5px;
@@ -1661,13 +1662,16 @@
                 display: none; /* Hide default text links, rely on sidebar on mobile */
             }
             .nav-brand {
-                font-size: 1.25rem;
-                margin-right: auto;
-                margin-left: 0.5rem;
-                letter-spacing: 0.5px;
+                position: absolute;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 1.3rem;
+                letter-spacing: 1px;
                 font-weight: 700;
+                white-space: nowrap;
             }
             .moon-widget {
+                margin-left: auto;
                 transform: scale(0.85);
                 transform-origin: right center;
             }

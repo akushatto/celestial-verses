@@ -952,9 +952,11 @@ function initSidebar() {
         });
     }
 }
-document.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSidebar);
+} else {
     initSidebar();
-});
+}
 
 async function updateSidebarStats() {
     if(!currentUser) return;
