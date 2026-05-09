@@ -1,16 +1,24 @@
 
         // STARFIELD
+        // STARFIELD OPTIMIZATION
         const cv = document.getElementById('starfield'), ctx = cv.getContext('2d');
         let W, H, stars = [];
-        function resize() { W = cv.width = window.innerWidth; H = cv.height = window.innerHeight; initStars() }
+        let resizeTimeout;
+        function resize() { 
+            W = cv.width = window.innerWidth; 
+            H = cv.height = window.innerHeight; 
+            initStars();
+        }
         function initStars() {
             stars = [];
-            for (let i = 0; i < 220; i++) {
+            const count = Math.min(220, Math.floor((W * H) / 4000)); // Responsive star count
+            for (let i = 0; i < count; i++) {
                 stars.push({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.5 + .3, o: Math.random() * .8 + .1, s: Math.random() * .4 + .05, t: Math.random() * Math.PI * 2, speed: Math.random() * .15 + .02 });
             }
         }
         function drawStars() {
-            if (!document.hidden) {
+            // Only draw if visible and on top of page to save CPU
+            if (!document.hidden && window.scrollY < H + 100) {
                 ctx.clearRect(0, 0, W, H);
                 stars.forEach(s => {
                     s.t += s.speed * .02;
@@ -21,7 +29,10 @@
             }
             requestAnimationFrame(drawStars);
         }
-        window.addEventListener('resize', resize);
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(resize, 200); // Debounce resize
+        });
         resize(); drawStars();
 
         // 3D TILT ON CARDS
@@ -40,38 +51,48 @@
             });
         });
 
-        // SUN RAYS
+        // SUN RAYS (Optimized Injection)
         const sunSys = document.getElementById('sunSys');
-        if(sunSys) sunSys.innerHTML = '<div class="sun-core"></div>';
-        for (let i = 0; i < 12; i++) {
-            const ray = document.createElement('div');
-            ray.className = 'ray';
-            const angle = (i / 12) * 360;
-            const len = 30 + Math.random() * 20;
-            ray.style.cssText = `width:${len}px;left:80px;top:79px;transform:rotate(${angle}deg);opacity:${.4 + Math.random() * .4}`;
-            if(sunSys) sunSys.appendChild(ray);
+        if(sunSys) {
+            const rayFragment = document.createDocumentFragment();
+            sunSys.innerHTML = '<div class="sun-core"></div>';
+            for (let i = 0; i < 12; i++) {
+                const ray = document.createElement('div');
+                ray.className = 'ray';
+                const angle = (i / 12) * 360;
+                const len = 30 + Math.random() * 20;
+                ray.style.cssText = `width:${len}px;left:80px;top:79px;transform:rotate(${angle}deg);opacity:${.4 + Math.random() * .4}`;
+                rayFragment.appendChild(ray);
+            }
+            sunSys.appendChild(rayFragment);
         }
 
-        // FLOATING PARTICLES
-        for (let i = 0; i < 18; i++) {
+        // FLOATING PARTICLES (Optimized Injection)
+        const particleFragment = document.createDocumentFragment();
+        const particleCount = window.innerWidth < 768 ? 8 : 18; // Fewer particles on mobile
+        for (let i = 0; i < particleCount; i++) {
             const p = document.createElement('div');
             p.className = 'particle';
             const size = Math.random() * 3 + 1;
             const colors = ['#c9a84c', '#b8cfe8', '#d4c5f0', '#2dd4bf', '#ffd43b'];
             p.style.cssText = `
-    width:${size}px;height:${size}px;
-    left:${Math.random() * 100}vw;
-    background:${colors[Math.floor(Math.random() * colors.length)]};
-    animation-duration:${8 + Math.random() * 12}s;
-    animation-delay:${Math.random() * 10}s;
-    --dx:${(Math.random() - 0.5) * 200}px;
-  `;
-            document.body.appendChild(p);
+                width:${size}px;height:${size}px;
+                left:${Math.random() * 100}vw;
+                background:${colors[Math.floor(Math.random() * colors.length)]};
+                animation-duration:${8 + Math.random() * 12}s;
+                animation-delay:${Math.random() * 10}s;
+                --dx:${(Math.random() - 0.5) * 200}px;
+            `;
+            particleFragment.appendChild(p);
         }
+        document.body.appendChild(particleFragment);
 
-        // PARALLAX ON SCROLL
+        // PARALLAX ON SCROLL (Throttled via requestAnimationFrame)
         const navEl = document.querySelector('nav');
-        window.addEventListener('scroll', () => {
+        let lastScrollY = 0;
+        let ticking = false;
+
+        function updateScroll() {
             const y = window.scrollY;
             const heroInner = document.querySelector('.hero-inner');
             if (heroInner) {
@@ -81,6 +102,15 @@
                 navEl.classList.add('scrolled');
             } else {
                 navEl.classList.remove('scrolled');
+            }
+            ticking = false;
+        }
+
+        window.addEventListener('scroll', () => {
+            lastScrollY = window.scrollY;
+            if (!ticking) {
+                window.requestAnimationFrame(updateScroll);
+                ticking = true;
             }
         });
 
@@ -273,6 +303,7 @@
                 poemGrid.innerHTML = '<p style="text-align: center; grid-column: 1/-1; opacity: 0.6;">No custom poems yet. Add your first masterpiece above.</p>';
                 return;
             }
+            const fragment = document.createDocumentFragment();
             customPoems.forEach(poem => {
                 const div = document.createElement('div');
                 div.className = 'poem-card fade-up';
@@ -288,14 +319,16 @@
                         <button type="button" class="action-btn delete-btn" data-id="${poem.id}">Delete</button>
                     </div>
                 `;
-                if(poemGrid) poemGrid.appendChild(div);
+                fragment.appendChild(div);
                 bindCardEffects(div);
             });
+            poemGrid.appendChild(fragment);
             bindActions();
         }
-
         function renderPublicPoems() {
-            if(publicPoemGrid) publicPoemGrid.innerHTML = '';
+            if(!publicPoemGrid) return;
+            publicPoemGrid.innerHTML = '';
+            const fragment = document.createDocumentFragment();
             publicPoems.forEach(poem => {
                 const div = document.createElement('div');
                 div.className = 'poem-card fade-up';
@@ -318,13 +351,14 @@
                         </div>
                     </div>
                 `;
-                if(publicPoemGrid) publicPoemGrid.appendChild(div);
+                fragment.appendChild(div);
                 bindCardEffects(div);
                 if (typeof observer !== 'undefined') {
                     observer.observe(div);
                 }
             });
-            
+            publicPoemGrid.appendChild(fragment);
+        function bindActions() {
             document.querySelectorAll('.star-btn').forEach(btn => {
                 btn.addEventListener('click', async () => {
                     if(!currentUser) return openAuthModal();

@@ -485,6 +485,7 @@
             transition: transform .5s cubic-bezier(.23, 1, .32, 1), box-shadow .5s;
             transform-style: preserve-3d;
             cursor: default;
+            will-change: transform;
         }
 
         .poem-card::before {
@@ -1440,8 +1441,10 @@
             flex-direction: column;
             overflow-y: auto;
             overflow-x: hidden;
+            will-change: left;
             scrollbar-width: thin;
             scrollbar-color: rgba(201,168,76,0.2) transparent;
+            will-change: left;
             box-shadow: 20px 0 60px rgba(0,0,0,0.6);
         }
         .sidebar.active { left: 0; }
