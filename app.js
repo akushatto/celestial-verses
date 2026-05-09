@@ -818,25 +818,68 @@ function initSidebar() {
     sidebar.innerHTML = `
         <div class="sidebar-header">
             <div class="sidebar-profile-glow" id="sidebarAura"></div>
-            <img src="https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Star" id="sidebarAvatar" class="sidebar-avatar">
-            <div class="sidebar-user-info">
-                <div id="sidebarUsername" class="sidebar-username">${currentUser || 'Guest Stargazer'}</div>
-                <div id="sidebarBadgeTop" class="sidebar-badge" style="font-size:0.8rem; color:var(--silver);">${currentUser ? 'Wanderer' : 'Not Logged In'}</div>
+            <div class="sidebar-avatar-wrap">
+                <img src="https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Star" id="sidebarAvatar" class="sidebar-avatar">
             </div>
+            <div id="sidebarUsername" class="sidebar-username">${currentUser || 'Guest Stargazer'}</div>
+            <div id="sidebarBadgeTop" class="sidebar-badge-label">${currentUser ? 'Stardust Wanderer' : 'Not Logged In'}</div>
             <div class="sidebar-stats" style="${currentUser ? '' : 'display:none;'}">
-                <div><span id="sidebarPoemsStat">0</span> Verses</div>
-                <div><span id="sidebarStarsStat">0</span> Stars</div>
+                <div class="sidebar-stat-item">
+                    <span class="sidebar-stat-val" id="sidebarPoemsStat">0</span>
+                    <span class="sidebar-stat-lbl">Verses</span>
+                </div>
+                <div class="sidebar-stat-item">
+                    <span class="sidebar-stat-val" id="sidebarStarsStat">0</span>
+                    <span class="sidebar-stat-lbl">Stars</span>
+                </div>
+                <div class="sidebar-stat-item">
+                    <span class="sidebar-stat-val" id="sidebarLevelStat">1</span>
+                    <span class="sidebar-stat-lbl">Level</span>
+                </div>
             </div>
         </div>
         <div class="sidebar-nav">
-            <a href="index.html">🏠 Home Base</a>
-            <a href="library.html">📖 Cosmic Library</a>
-            <a href="dashboard.html">🌠 My Constellations</a>
-            <a href="#" id="sidebarSavedBtn">🔖 Saved Verses</a>
+            <div class="sidebar-nav-section-label">Navigate</div>
+            <a href="index.html">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                Home Base
+            </a>
+            <a href="library.html">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+                Cosmic Library
+            </a>
+            <a href="dashboard.html">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                My Constellations
+            </a>
+            <a href="#" id="sidebarSavedBtn">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+                Saved Verses
+            </a>
+            <div class="sidebar-divider"></div>
+            <div class="sidebar-nav-section-label">Explore</div>
+            <a href="library.html#constellations">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+                Community Map
+            </a>
+            <a href="about.html">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                About
+            </a>
         </div>
         <div class="sidebar-footer">
-            <button id="sidebarEclipseToggle">🌑 Eclipse Mode</button>
-            ${currentUser ? '<button id="sidebarLogout" style="color: var(--rose);">🚪 Leave Universe</button>' : '<button id="sidebarLogin">🗝️ Login</button>'}
+            <div class="sidebar-divider"></div>
+            <button id="sidebarEclipseToggle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+                Eclipse Mode
+            </button>
+            ${currentUser ? `<button id="sidebarLogout" class="danger">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Leave Universe
+            </button>` : `<button id="sidebarLogin">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                Enter the Universe
+            </button>`}
         </div>
     `;
     document.body.appendChild(sidebar);
@@ -877,22 +920,31 @@ async function updateSidebarStats() {
         const res = await fetch(`${API_BASE}/user-stats?username=${encodeURIComponent(currentUser)}`);
         if (res.ok) {
             const stats = await res.json();
-            document.getElementById('sidebarPoemsStat').textContent = stats.count;
-            document.getElementById('sidebarStarsStat').textContent = stats.stars;
-            // Update gamified title
+            const pStat = document.getElementById('sidebarPoemsStat');
+            const sStat = document.getElementById('sidebarStarsStat');
+            const lStat = document.getElementById('sidebarLevelStat');
+            if(pStat) pStat.textContent = stats.count;
+            if(sStat) sStat.textContent = stats.stars;
+
             const energy = (stats.count * 50) + (stats.stars * 10);
             const level = Math.floor(energy / 200) + 1;
-            let title = "Stardust Wanderer";
-            if(level >= 2) title = "Nova Architect";
-            if(level >= 4) title = "Galaxy Weaver";
-            if(level >= 7) title = "Universal Sage";
-            document.getElementById('sidebarBadgeTop').textContent = `Lv.${level} ${title}`;
-            
-            // Sync Aura if loaded
+            if(lStat) lStat.textContent = level;
+
+            let title = 'Stardust Wanderer';
+            if(level >= 2) title = 'Nova Architect';
+            if(level >= 4) title = 'Galaxy Weaver';
+            if(level >= 7) title = 'Universal Sage';
+            const badge = document.getElementById('sidebarBadgeTop');
+            if(badge) badge.textContent = title;
+
+            // Sync aura glow color
             const storedAura = localStorage.getItem('celestial_aura') || 'var(--gold)';
-            document.getElementById('sidebarAura').style.background = storedAura;
+            const auraEl = document.getElementById('sidebarAura');
+            if(auraEl) auraEl.style.background = storedAura;
+
             const storedAvatar = localStorage.getItem('celestial_avatar') || 'Star';
-            document.getElementById('sidebarAvatar').src = `https://api.dicebear.com/7.x/bottts-neutral/svg?seed=${storedAvatar}`;
+            const avatarEl = document.getElementById('sidebarAvatar');
+            if(avatarEl) avatarEl.src = `https://api.dicebear.com/7.x/bottts-neutral/svg?seed=${storedAvatar}`;
         }
     } catch(e) {}
 }
