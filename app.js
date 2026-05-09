@@ -365,6 +365,32 @@
                     }
                 });
             });
+
+            // Also render top public poems to home page if the container exists
+            const homeGrid = document.getElementById('homePublicPoemsGrid');
+            if (homeGrid) {
+                homeGrid.innerHTML = '';
+                const displayPoems = publicPoems.slice(0, 6); // Show top 6
+                displayPoems.forEach(poem => {
+                    const div = document.createElement('div');
+                    div.className = 'poem-card fade-up';
+                    div.setAttribute('data-tilt', 'true');
+                    div.innerHTML = `
+                        <span class="poem-tag" style="color:var(--teal)">Community</span>
+                        <div class="poem-title">${escapeHTML(poem.title)}</div>
+                        <div class="poem-author">${escapeHTML(poem.author)}</div>
+                        <div class="poem-text">${escapeHTML(poem.text)}</div>
+                        <div class="poem-controls">
+                            <button class="audio-narration-btn" data-audio="space">Play Audio</button>
+                            <button class="zen-btn">Zen Mode</button>
+                            <button class="bookmark-btn">⭐</button>
+                        </div>
+                    `;
+                    homeGrid.appendChild(div);
+                    bindCardEffects(div);
+                    if (typeof observer !== 'undefined') observer.observe(div);
+                });
+            }
         }
 
         function bindCardEffects(div) {
@@ -477,8 +503,20 @@
                 label.style.top = y + '%';
                 
                 star.addEventListener('click', () => {
-                    const el = document.querySelector(`.public-library-sec .poem-title`);
-                    el.scrollIntoView({ behavior: 'smooth' });
+                    const zTitle = document.getElementById('zenPoemTitle');
+                    const zAuthor = document.getElementById('zenPoemAuthor');
+                    const zText = document.getElementById('zenPoemText');
+                    const zOverlay = document.getElementById('zenModeOverlay');
+                    if (zOverlay && zTitle && zAuthor && zText) {
+                        zTitle.textContent = publicPoems[i].title;
+                        zAuthor.textContent = publicPoems[i].author;
+                        zText.innerHTML = escapeHTML(publicPoems[i].text).replace(/\n/g, '<br>');
+                        zOverlay.classList.add('active');
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        const el = document.querySelector(`.public-library-sec .poem-title`);
+                        if(el) el.scrollIntoView({ behavior: 'smooth' });
+                    }
                 });
                 
                 map.appendChild(star);
@@ -780,3 +818,189 @@ async function followUser(followingUser) {
     const data = await res.json();
     alert(data.status === 'followed' ? `You are now following ${followingUser}` : `Unfollowed ${followingUser}`);
 }
+
+// --- NEW FEATURES LOGIC ---
+
+// 1. Inject Controls into existing poem cards
+function injectPoemControls() {
+    document.querySelectorAll('.poem-card').forEach(card => {
+        if (!card.querySelector('.poem-controls') && !card.querySelector('.poem-actions')) {
+            const controls = document.createElement('div');
+            controls.className = 'poem-controls';
+            controls.innerHTML = `
+                <button class="audio-narration-btn" data-audio="space">Play Audio</button>
+                <button class="zen-btn">Zen Mode</button>
+                <button class="bookmark-btn">⭐</button>
+            `;
+            card.appendChild(controls);
+        }
+    });
+}
+injectPoemControls();
+
+// 2. Verse of the Day Spotlight
+const votdList = [
+    { title: "The Cosmic Shore", author: "Carl Sagan", text: "The surface of the Earth is the shore of the cosmic ocean. From it we have learned most of what we know. Recently, we have waded a little out to sea, enough to dampen our toes or, at most, wet our ankles." },
+    { title: "Starlight", author: "William Wordsworth", text: "There is a given volume of energy... it is the same starlight that has travelled for millennia, just to reach our eyes tonight." },
+    { title: "Silent Void", author: "Anonymous", text: "In the quiet of the endless night,\nWe find our place, our gentle light." }
+];
+function initVOTD() {
+    const votdCard = document.getElementById('votdCard');
+    if (!votdCard) return;
+    const today = new Date();
+    const index = today.getDate() % votdList.length;
+    const poem = votdList[index];
+    votdCard.innerHTML = `
+        <div class="poem-title" style="font-size: 2rem; margin-bottom: 0.5rem;">${poem.title}</div>
+        <div class="poem-author" style="font-size: 1.1rem; margin-bottom: 1.5rem;">${poem.author}</div>
+        <div class="poem-text" style="font-size: 1.2rem; max-width: 600px; margin: 0 auto;">${poem.text}</div>
+    `;
+}
+initVOTD();
+
+// 3. Audio Narrations (Simulated)
+let narrationAudio = null;
+document.addEventListener('click', e => {
+    if (e.target.classList.contains('audio-narration-btn')) {
+        const btn = e.target;
+        if (btn.textContent === 'Stop Audio') {
+            if (narrationAudio) { narrationAudio.pause(); narrationAudio = null; }
+            btn.textContent = 'Play Audio';
+            return;
+        }
+        document.querySelectorAll('.audio-narration-btn').forEach(b => b.textContent = 'Play Audio');
+        btn.textContent = 'Stop Audio';
+        
+        if (narrationAudio) narrationAudio.pause();
+        // Fallback to ambient soundhelix if no specific narration is found
+        const src = btn.dataset.audio === 'lunar' 
+            ? 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3' 
+            : 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3';
+        narrationAudio = new Audio(src);
+        narrationAudio.play();
+        
+        narrationAudio.onended = () => {
+            btn.textContent = 'Play Audio';
+        };
+    }
+});
+
+// 4. Zen Mode
+const zenOverlay = document.getElementById('zenModeOverlay');
+const zenClose = document.getElementById('zenCloseBtn');
+const zenTitle = document.getElementById('zenPoemTitle');
+const zenAuthor = document.getElementById('zenPoemAuthor');
+const zenText = document.getElementById('zenPoemText');
+
+document.addEventListener('click', e => {
+    if (e.target.classList.contains('zen-btn')) {
+        const card = e.target.closest('.poem-card');
+        const title = card.querySelector('.poem-title').textContent;
+        const author = card.querySelector('.poem-author').textContent;
+        const text = card.querySelector('.poem-text').innerHTML;
+        
+        zenTitle.textContent = title;
+        zenAuthor.textContent = author;
+        zenText.innerHTML = text;
+        
+        zenOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+});
+
+if (zenClose) {
+    zenClose.addEventListener('click', () => {
+        zenOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+    });
+}
+
+// 5. Bookmarks
+let bookmarks = JSON.parse(localStorage.getItem('celestialBookmarks') || '[]');
+document.addEventListener('click', e => {
+    if (e.target.classList.contains('bookmark-btn')) {
+        const btn = e.target;
+        const card = btn.closest('.poem-card');
+        const title = card.querySelector('.poem-title').textContent;
+        
+        if (bookmarks.includes(title)) {
+            bookmarks = bookmarks.filter(t => t !== title);
+            btn.classList.remove('active');
+        } else {
+            bookmarks.push(title);
+            btn.classList.add('active');
+        }
+        localStorage.setItem('celestialBookmarks', JSON.stringify(bookmarks));
+    }
+});
+// Restore bookmark state
+document.querySelectorAll('.poem-card').forEach(card => {
+    const titleEl = card.querySelector('.poem-title');
+    if (titleEl) {
+        const title = titleEl.textContent;
+        if (bookmarks.includes(title)) {
+            const btn = card.querySelector('.bookmark-btn');
+            if (btn) btn.classList.add('active');
+        }
+    }
+});
+
+// 6. Lunar Whispers Newsletter
+const newsletterForm = document.getElementById('newsletterForm');
+if (newsletterForm) {
+    newsletterForm.addEventListener('submit', e => {
+        e.preventDefault();
+        const email = document.getElementById('newsletterEmail').value;
+        if (email) {
+            document.getElementById('newsletterConfirm').style.display = 'block';
+            newsletterForm.reset();
+            setTimeout(() => {
+                document.getElementById('newsletterConfirm').style.display = 'none';
+            }, 4000);
+        }
+    });
+}
+
+// 7. Falling Star Interaction
+const fallingStar = document.getElementById('fallingStar');
+const fsModal = document.getElementById('fallingStarModal');
+const fsClose = document.getElementById('fallingStarClose');
+const fsPoemText = document.getElementById('secretPoemText');
+const fsPoemAuthor = document.getElementById('secretPoemAuthor');
+
+const secretPoems = [
+    { text: "I have loved the stars too fondly to be fearful of the night.", author: "Sarah Williams" },
+    { text: "Hope is being able to see that there is light despite all of the darkness.", author: "Desmond Tutu" },
+    { text: "Even the darkest night will end and the sun will rise.", author: "Victor Hugo" }
+];
+
+function triggerFallingStar() {
+    if (document.hidden) return;
+    fallingStar.classList.remove('active');
+    void fallingStar.offsetWidth; // trigger reflow
+    fallingStar.style.top = Math.random() * 30 + 'vh';
+    fallingStar.classList.add('active');
+}
+
+// Trigger a falling star every 15-30 seconds
+setInterval(() => {
+    if (Math.random() > 0.3) triggerFallingStar();
+}, 20000);
+
+if (fallingStar) {
+    fallingStar.addEventListener('click', () => {
+        fallingStar.classList.remove('active');
+        const poem = secretPoems[Math.floor(Math.random() * secretPoems.length)];
+        fsPoemText.textContent = `"${poem.text}"`;
+        fsPoemAuthor.textContent = `— ${poem.author}`;
+        fsModal.style.display = 'flex';
+        setTimeout(() => fsModal.classList.add('active'), 10);
+    });
+}
+if (fsClose) {
+    fsClose.addEventListener('click', () => {
+        fsModal.classList.remove('active');
+        setTimeout(() => fsModal.style.display = 'none', 300);
+    });
+}
+

@@ -1251,6 +1251,142 @@
             opacity: .4;
         }
 
+        /* --- NEW FEATURES STYLES --- */
+        
+        /* SPOTLIGHT CARD (Verse of the day) */
+        .spotlight-card {
+            background: linear-gradient(145deg, rgba(201, 168, 76, 0.08) 0%, rgba(5, 10, 26, 0.4) 100%);
+            border: 1px solid rgba(201, 168, 76, 0.3);
+            border-radius: 8px;
+            padding: 3rem;
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(201, 168, 76, 0.1);
+            position: relative;
+        }
+
+        /* POEM CONTROLS (Zen, Audio, Bookmark) */
+        .poem-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+            opacity: 0.5;
+            transition: opacity 0.3s;
+        }
+        .poem-card:hover .poem-controls {
+            opacity: 1;
+        }
+        .poem-controls button {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--silver);
+            padding: 0.4rem 0.8rem;
+            font-family: 'Cinzel', serif;
+            font-size: 0.7rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .poem-controls button:hover {
+            background: var(--gold);
+            color: var(--deep);
+            border-color: var(--gold);
+        }
+        .bookmark-btn.active {
+            color: var(--gold);
+            border-color: var(--gold);
+        }
+
+        /* NEW SECTION COLORS */
+        .planets-sec .section-title, .planets-sec .poem-tag, .planets-sec .divider { color: #8ab6d6; }
+        .planets-sec .poem-card { border-color: rgba(138, 182, 214, 0.12); }
+        .twilight-sec .section-title, .twilight-sec .poem-tag, .twilight-sec .divider { color: #f29a86; }
+        .twilight-sec .poem-card { border-color: rgba(242, 154, 134, 0.12); }
+        .comets-sec .section-title, .comets-sec .poem-tag, .comets-sec .divider { color: #b1e8e2; }
+        .comets-sec .poem-card { border-color: rgba(177, 232, 226, 0.12); }
+
+        /* ZEN MODE */
+        .zen-mode-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.8s ease;
+        }
+        .zen-mode-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .zen-close {
+            position: absolute;
+            top: 2rem; right: 2rem;
+            background: none; border: none;
+            color: var(--silver); font-size: 2rem;
+            cursor: pointer; opacity: 0.5;
+            transition: opacity 0.3s;
+        }
+        .zen-close:hover { opacity: 1; color: var(--gold); }
+        .zen-content {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.8s 0.3s;
+        }
+        .zen-mode-overlay.active .zen-content {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* FALLING STAR */
+        .falling-star {
+            position: fixed;
+            width: 2px;
+            height: 2px;
+            background: transparent;
+            box-shadow: 0 0 10px #fff, 0 0 20px #fff;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+        }
+        .falling-star.active {
+            pointer-events: auto;
+            cursor: pointer;
+            opacity: 1;
+            width: 4px; height: 4px;
+            border-radius: 50%;
+            background: #fff;
+            animation: fall 2.5s linear forwards;
+        }
+        .falling-star.active::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) rotate(45deg);
+            width: 60px; height: 2px;
+            background: linear-gradient(90deg, rgba(255,255,255,1), rgba(255,255,255,0));
+        }
+
+        @keyframes fall {
+            0% { transform: translate(100vw, -10vh); opacity: 1; }
+            100% { transform: translate(-10vw, 110vh); opacity: 0; }
+        }
+
+        /* NEWSLETTER BOX */
+        .newsletter-box {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 3rem;
+            border-radius: 8px;
+            border: 1px solid rgba(212, 197, 240, 0.2);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
         /* RESPONSIVE */
         @media(max-width:640px) {
             nav {
