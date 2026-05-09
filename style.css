@@ -16,13 +16,17 @@
         }
 
         html {
-            scroll-behavior: smooth
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+            width: 100%;
         }
 
         body {
             background: var(--deep);
             color: var(--pale);
             font-family: 'Cormorant Garamond', serif;
+            overflow-x: hidden;
+            width: 100%;
             overflow-x: hidden;
         }
 
