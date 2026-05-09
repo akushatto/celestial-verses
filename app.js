@@ -457,6 +457,8 @@
                 }
             });
             publicPoemGrid.appendChild(fragment);
+        }
+
         function bindActions() {
             // Public Actions
             document.querySelectorAll('.star-btn').forEach(btn => {
