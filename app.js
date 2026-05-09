@@ -943,12 +943,18 @@ function initSidebar() {
     const loginBtn = document.getElementById('sidebarLogin');
     if (loginBtn) loginBtn.addEventListener('click', openAuthModal);
     
-    document.getElementById('sidebarEclipseToggle').addEventListener('click', () => {
-        document.body.style.background = document.body.style.background === 'var(--pale)' ? 'var(--deep)' : 'var(--pale)';
-        document.body.style.color = document.body.style.background === 'var(--pale)' ? 'var(--deep)' : 'var(--pale)';
-    });
+    const eclipseToggle = document.getElementById('sidebarEclipseToggle');
+    if (eclipseToggle) {
+        eclipseToggle.addEventListener('click', () => {
+            const isLight = document.body.style.background === 'var(--pale)';
+            document.body.style.background = isLight ? 'var(--deep)' : 'var(--pale)';
+            document.body.style.color = isLight ? 'var(--pale)' : 'var(--deep)';
+        });
+    }
 }
-initSidebar();
+document.addEventListener('DOMContentLoaded', () => {
+    initSidebar();
+});
 
 async function updateSidebarStats() {
     if(!currentUser) return;
