@@ -806,10 +806,8 @@ function initSidebar() {
     if(!nav) return;
 
     // Hamburger
-    const hamburger = document.createElement('div');
-    hamburger.className = 'hamburger';
-    hamburger.innerHTML = '<span></span><span></span><span></span>';
-    nav.insertBefore(hamburger, nav.firstChild);
+    const hamburger = document.querySelector('.hamburger');
+    if(!hamburger) return;
 
     // Sidebar
     const sidebar = document.createElement('aside');
