@@ -1,10 +1,12 @@
 
         // STARFIELD
         // STARFIELD OPTIMIZATION
-        const cv = document.getElementById('starfield'), ctx = cv.getContext('2d');
+        const cv = document.getElementById('starfield');
+        const ctx = cv ? cv.getContext('2d') : null;
         let W, H, stars = [];
         let resizeTimeout;
         function resize() { 
+            if (!cv) return;
             W = cv.width = window.innerWidth; 
             H = cv.height = window.innerHeight; 
             initStars();
@@ -17,6 +19,7 @@
             }
         }
         function drawStars() {
+            if (!cv || !ctx) return;
             // Only draw if visible and on top of page to save CPU
             if (!document.hidden && window.scrollY < H + 100) {
                 ctx.clearRect(0, 0, W, H);
@@ -98,10 +101,12 @@
             if (heroInner) {
                 heroInner.style.transform = `translateY(${y * .3}px) rotateX(2deg)`;
             }
-            if (y > 50) {
-                navEl.classList.add('scrolled');
-            } else {
-                navEl.classList.remove('scrolled');
+            if (navEl) {
+                if (y > 50) {
+                    navEl.classList.add('scrolled');
+                } else {
+                    navEl.classList.remove('scrolled');
+                }
             }
             ticking = false;
         }
@@ -133,18 +138,105 @@
             observer.observe(el);
         });
 
-        // CUSTOM POEMS LOGIC
+        // --- CORE STATE ---
+        const API_BASE = window.location.origin;
+        let currentUser = localStorage.getItem('celestialVerses_user') || null;
+        let customPoems = [];
+        let publicPoems = [];
+
+        // --- ELEMENTS ---
+        const navEl = document.querySelector('nav');
         const poemForm = document.getElementById('customPoemForm');
         const poemGrid = document.getElementById('customPoemGrid');
         const publicPoemGrid = document.getElementById('publicPoemGrid');
         const submitBtn = document.getElementById('submitBtn');
         const loginBtn = document.getElementById('loginBtn');
         const userStatsWrap = document.getElementById('userStatsWrap');
-        
-        let currentUser = localStorage.getItem('celestialVerses_user') || null;
-        let customPoems = [];
-        let publicPoems = [];
-        const API_BASE = window.location.origin;
+
+        // --- SIDEBAR INITIALIZATION (Moved to top for reliability) ---
+        function initSidebar() {
+            try {
+                const nav = document.querySelector('nav');
+                const hamburger = document.querySelector('.hamburger');
+                if(!nav || !hamburger) return;
+
+                const sidebar = document.createElement('aside');
+                sidebar.id = 'sidebar';
+                sidebar.className = 'sidebar';
+                sidebar.innerHTML = `
+                    <div class="sidebar-header">
+                        <div class="sidebar-profile-glow" id="sidebarAura"></div>
+                        <div class="sidebar-avatar-wrap">
+                            <img src="https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Star" id="sidebarAvatar" class="sidebar-avatar">
+                        </div>
+                        <div id="sidebarUsername" class="sidebar-username">${currentUser || 'Guest Stargazer'}</div>
+                        <div id="sidebarBadgeTop" class="sidebar-badge-label">${currentUser ? 'Stardust Wanderer' : 'Not Logged In'}</div>
+                        <div class="sidebar-stats" style="${currentUser ? '' : 'display:none;'}">
+                            <div class="sidebar-stat-item">
+                                <span class="sidebar-stat-val" id="sidebarPoemsStat">0</span>
+                                <span class="sidebar-stat-lbl">Verses</span>
+                            </div>
+                            <div class="sidebar-stat-item">
+                                <span class="sidebar-stat-val" id="sidebarStarsStat">0</span>
+                                <span class="sidebar-stat-lbl">Stars</span>
+                            </div>
+                            <div class="sidebar-stat-item">
+                                <span class="sidebar-stat-val" id="sidebarLevelStat">1</span>
+                                <span class="sidebar-stat-lbl">Level</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sidebar-nav">
+                        <div class="sidebar-nav-section-label">Navigate</div>
+                        <a href="index.html">Home Base</a>
+                        <a href="library.html">Cosmic Library</a>
+                        <a href="dashboard.html">My Constellations</a>
+                        <a href="#" id="sidebarSavedBtn">Saved Verses</a>
+                        <div class="sidebar-divider"></div>
+                        <div class="sidebar-nav-section-label">Explore</div>
+                        <a href="library.html#constellations">Community Map</a>
+                        <a href="about.html">About</a>
+                    </div>
+                    <div class="sidebar-footer">
+                        <div class="sidebar-divider"></div>
+                        <button id="sidebarEclipseToggle">Eclipse Mode</button>
+                        ${currentUser ? `<button id="sidebarLogout" class="danger">Leave Universe</button>` : `<button id="sidebarLogin">Enter the Universe</button>`}
+                    </div>
+                `;
+                document.body.appendChild(sidebar);
+
+                const overlay = document.createElement('div');
+                overlay.className = 'sidebar-overlay';
+                document.body.appendChild(overlay);
+
+                const toggleSidebar = () => {
+                    sidebar.classList.toggle('active');
+                    overlay.classList.toggle('active');
+                    hamburger.classList.toggle('active');
+                    if (sidebar.classList.contains('active')) updateSidebarStats();
+                };
+
+                hamburger.addEventListener('click', toggleSidebar);
+                overlay.addEventListener('click', toggleSidebar);
+
+                const sLogout = document.getElementById('sidebarLogout');
+                if (sLogout) sLogout.addEventListener('click', logoutUser);
+                const sLogin = document.getElementById('sidebarLogin');
+                if (sLogin) sLogin.addEventListener('click', openAuthModal);
+                const sEclipse = document.getElementById('sidebarEclipseToggle');
+                if (sEclipse) sEclipse.addEventListener('click', () => {
+                    const isLight = document.body.style.background === 'var(--pale)';
+                    document.body.style.background = isLight ? 'var(--deep)' : 'var(--pale)';
+                    document.body.style.color = isLight ? 'var(--pale)' : 'var(--deep)';
+                });
+            } catch (err) { console.error("Sidebar Init Error:", err); }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initSidebar);
+        } else {
+            initSidebar();
+        }
 
         async function loadPoems() {
             if (currentUser) {
@@ -838,125 +930,7 @@ async function followUser(followingUser) {
     alert(data.status === 'followed' ? `You are now following ${followingUser}` : `Unfollowed ${followingUser}`);
 }
 
-// --- SIDEBAR INJECTION & LOGIC ---
-function initSidebar() {
-    const nav = document.querySelector('nav');
-    if(!nav) return;
 
-    // Hamburger
-    const hamburger = document.querySelector('.hamburger');
-    if(!hamburger) return;
-
-    // Sidebar
-    const sidebar = document.createElement('aside');
-    sidebar.id = 'sidebar';
-    sidebar.className = 'sidebar';
-    sidebar.innerHTML = `
-        <div class="sidebar-header">
-            <div class="sidebar-profile-glow" id="sidebarAura"></div>
-            <div class="sidebar-avatar-wrap">
-                <img src="https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Star" id="sidebarAvatar" class="sidebar-avatar">
-            </div>
-            <div id="sidebarUsername" class="sidebar-username">${currentUser || 'Guest Stargazer'}</div>
-            <div id="sidebarBadgeTop" class="sidebar-badge-label">${currentUser ? 'Stardust Wanderer' : 'Not Logged In'}</div>
-            <div class="sidebar-stats" style="${currentUser ? '' : 'display:none;'}">
-                <div class="sidebar-stat-item">
-                    <span class="sidebar-stat-val" id="sidebarPoemsStat">0</span>
-                    <span class="sidebar-stat-lbl">Verses</span>
-                </div>
-                <div class="sidebar-stat-item">
-                    <span class="sidebar-stat-val" id="sidebarStarsStat">0</span>
-                    <span class="sidebar-stat-lbl">Stars</span>
-                </div>
-                <div class="sidebar-stat-item">
-                    <span class="sidebar-stat-val" id="sidebarLevelStat">1</span>
-                    <span class="sidebar-stat-lbl">Level</span>
-                </div>
-            </div>
-        </div>
-        <div class="sidebar-nav">
-            <div class="sidebar-nav-section-label">Navigate</div>
-            <a href="index.html">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                Home Base
-            </a>
-            <a href="library.html">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
-                Cosmic Library
-            </a>
-            <a href="dashboard.html">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                My Constellations
-            </a>
-            <a href="#" id="sidebarSavedBtn">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
-                Saved Verses
-            </a>
-            <div class="sidebar-divider"></div>
-            <div class="sidebar-nav-section-label">Explore</div>
-            <a href="library.html#constellations">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
-                Community Map
-            </a>
-            <a href="about.html">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                About
-            </a>
-        </div>
-        <div class="sidebar-footer">
-            <div class="sidebar-divider"></div>
-            <button id="sidebarEclipseToggle">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-                Eclipse Mode
-            </button>
-            ${currentUser ? `<button id="sidebarLogout" class="danger">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                Leave Universe
-            </button>` : `<button id="sidebarLogin">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-                Enter the Universe
-            </button>`}
-        </div>
-    `;
-    document.body.appendChild(sidebar);
-
-    const overlay = document.createElement('div');
-    overlay.className = 'sidebar-overlay';
-    document.body.appendChild(overlay);
-
-    hamburger.addEventListener('click', () => {
-        sidebar.classList.toggle('active');
-        overlay.classList.toggle('active');
-        hamburger.classList.toggle('active');
-        if (sidebar.classList.contains('active')) updateSidebarStats();
-    });
-    
-    overlay.addEventListener('click', () => {
-        sidebar.classList.remove('active');
-        overlay.classList.remove('active');
-        hamburger.classList.remove('active');
-    });
-
-    const logoutBtn = document.getElementById('sidebarLogout');
-    if (logoutBtn) logoutBtn.addEventListener('click', logoutUser);
-    
-    const loginBtn = document.getElementById('sidebarLogin');
-    if (loginBtn) loginBtn.addEventListener('click', openAuthModal);
-    
-    const eclipseToggle = document.getElementById('sidebarEclipseToggle');
-    if (eclipseToggle) {
-        eclipseToggle.addEventListener('click', () => {
-            const isLight = document.body.style.background === 'var(--pale)';
-            document.body.style.background = isLight ? 'var(--deep)' : 'var(--pale)';
-            document.body.style.color = isLight ? 'var(--pale)' : 'var(--deep)';
-        });
-    }
-}
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initSidebar);
-} else {
-    initSidebar();
-}
 
 async function updateSidebarStats() {
     if(!currentUser) return;
