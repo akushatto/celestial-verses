@@ -1024,14 +1024,7 @@
             text-align: center;
         }
 
-        @media (max-width: 768px) {
-            nav { gap: 1rem; padding: 1rem; }
-            nav a { font-size: 0.6rem; }
-            .hero h1 { font-size: 3.5rem; }
-            .section-title { font-size: 2rem; }
-            .poem-grid { grid-template-columns: 1fr; }
-            .ambient-player { bottom: 1rem; right: 1rem; }
-        }
+
 
         @keyframes drift {
             0% {
@@ -1635,19 +1628,81 @@
         .aura-opt.active { border: 2px solid white; box-shadow: 0 0 15px currentColor; transform: scale(1.1); }
         .aura-opt.locked { filter: grayscale(100%) opacity(0.3); cursor: not-allowed; }
 
-        /* RESPONSIVE */
-        @media(max-width:640px) {
+        /* --- COMPREHENSIVE MOBILE RESPONSIVENESS --- */
+        @media (max-width: 768px) {
+            /* Navigation */
             nav {
-                gap: 1rem;
-                flex-wrap: wrap
+                padding: 1rem;
+                justify-content: space-between;
+                gap: 0.5rem;
             }
-
-            nav a {
-                font-size: .6rem
+            nav > a {
+                display: none; /* Hide default text links, rely on sidebar on mobile */
             }
-
+            #loginBtn {
+                border-left: none !important;
+                padding-left: 0 !important;
+                font-size: 0.9rem;
+            }
+            .moon-widget {
+                transform: scale(0.85);
+                transform-origin: right center;
+            }
+            
+            /* Sidebar */
+            .sidebar {
+                width: 85vw; /* Take up most of the screen but leave a sliver to tap out */
+                left: -85vw;
+            }
+            
+            /* Typography */
+            .hero h1 {
+                font-size: 3.2rem;
+            }
+            .hero p {
+                font-size: 1rem;
+                padding: 0 1rem;
+            }
+            .section-title {
+                font-size: 2rem;
+            }
+            
+            /* Layout & Grids */
             .poem-grid {
-                grid-template-columns: 1fr
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                padding: 0 0.5rem;
+            }
+            
+            /* Gamified Profile Dashboard */
+            .gamified-profile-wrap {
+                padding: 1.5rem 1rem;
+            }
+            .profile-header-gamified {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+            .profile-info-gamified {
+                width: 100%;
+            }
+            .avatar-options, .aura-picker {
+                justify-content: center;
+            }
+            
+            /* Modals & Overlays */
+            .auth-box {
+                width: 90%;
+                padding: 2rem 1.5rem;
+            }
+            #zenPoemTitle { font-size: 2rem !important; }
+            #zenPoemText { font-size: 1.2rem !important; padding: 0 1rem; }
+            
+            /* Ambient Player */
+            .ambient-player {
+                bottom: 1rem;
+                right: 1rem;
+                transform: scale(0.9);
+                transform-origin: bottom right;
             }
         }
-    
