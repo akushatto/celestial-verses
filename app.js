@@ -239,19 +239,28 @@
         }
 
         async function loadPoems() {
-            if (currentUser) {
-                try {
-                    const res = await fetch(`${API_BASE}/poems?username=${encodeURIComponent(currentUser)}`);
-                    if (res.ok) {
-                        customPoems = await res.json();
-                        renderPoems();
-                        updateUserStats();
-                    }
-                } catch (e) { console.error(e); }
-            } else {
+            if (!currentUser) {
                 customPoems = [];
                 renderPoems();
+                return;
             }
+
+            if (IS_LOCAL) {
+                const saved = localStorage.getItem(`celestial_poems_${currentUser}`);
+                customPoems = saved ? JSON.parse(saved) : [];
+                renderPoems();
+                updateSidebarStats();
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/poems?username=${encodeURIComponent(currentUser)}`);
+                if (res.ok) {
+                    customPoems = await res.json();
+                    renderPoems();
+                    updateUserStats();
+                }
+            } catch (e) { console.error(e); }
         }
 
         async function loadPublicPoems() {
@@ -717,37 +726,48 @@
 
         if(poemForm) poemForm.addEventListener('submit', async e => {
             e.preventDefault();
-            if (!currentUser) return;
+            if (!currentUser) return openAuthModal();
             const idInput = document.getElementById('poemId').value;
             const title = document.getElementById('poemTitle').value;
             const author = document.getElementById('poemAuthor').value;
             const text = document.getElementById('poemText').value;
             const isPublic = document.getElementById('isPublicPoem').checked;
 
-            submitBtn.disabled = true;
-            try {
+            if (IS_LOCAL) {
                 if (idInput) {
-                    const res = await fetch(`${API_BASE}/poems/${idInput}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username: currentUser, title, author, text, is_public: isPublic })
-                    });
-                    if(res.ok) {
-                        submitBtn.textContent = 'Add Poem';
+                    const idx = customPoems.findIndex(p => p.id == idInput);
+                    if (idx !== -1) {
+                        customPoems[idx] = { ...customPoems[idx], title, author, text, is_public: isPublic };
                     }
                 } else {
-                    const res = await fetch(`${API_BASE}/poems`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username: currentUser, title, author, text, is_public: isPublic })
-                    });
+                    customPoems.push({ id: Date.now(), title, author, text, is_public: isPublic, username: currentUser });
                 }
-                loadPoems();
-                loadPublicPoems();
+                localStorage.setItem(`celestial_poems_${currentUser}`, JSON.stringify(customPoems));
                 poemForm.reset();
                 document.getElementById('poemId').value = '';
-            } catch(err) { alert('Failed to save poem.'); }
-            finally { submitBtn.disabled = false; }
+                if(submitBtn) submitBtn.textContent = 'Add Poem';
+                renderPoems();
+                updateSidebarStats();
+                return;
+            }
+
+            if(submitBtn) submitBtn.disabled = true;
+            try {
+                const method = idInput ? 'PUT' : 'POST';
+                const url = idInput ? `${API_BASE}/poems/${idInput}` : `${API_BASE}/poems`;
+                const res = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: currentUser, title, author, text, is_public: isPublic })
+                });
+                if (res.ok) {
+                    poemForm.reset();
+                    document.getElementById('poemId').value = '';
+                    if(submitBtn) submitBtn.textContent = 'Add Poem';
+                    loadPoems();
+                }
+            } catch (e) {}
+            finally { if(submitBtn) submitBtn.disabled = false; }
         });
 
         function editPoem(id) {
