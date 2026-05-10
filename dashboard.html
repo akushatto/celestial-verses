@@ -127,17 +127,21 @@
             <!-- PROFILE TAB -->
             <div id="tab-profile" class="dashboard-view">
                 <div class="gamified-profile-wrap">
-                    <div class="profile-header-gamified">
-                        <div class="avatar-ring" id="userAuraRing">
-                            <img id="userAvatar" src="https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Star" class="profile-avatar-large">
-                        </div>
-                        <div class="profile-info-gamified">
-                            <h2 id="userHandleDisplay" style="font-family: 'Cinzel'; color: var(--gold); margin-bottom: 0.2rem;">@username</h2>
-                            <div id="userBadge" class="user-badge" style="display: inline-block; margin-bottom: 1rem;">Stardust Wanderer</div>
+                    <div class="profile-banner-wrap" id="userBannerWrap">
+                        <div class="profile-header-gamified">
+                            <div class="avatar-ring" id="userAuraRing">
+                                <img id="userAvatar" src="https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Star" class="profile-avatar-large">
+                            </div>
+                            <div class="profile-info-gamified">
+                                <h2 id="userHandleDisplay" style="font-family: 'Cinzel'; color: var(--gold); margin-bottom: 0.2rem;">@username</h2>
+                                <div id="userPronounsDisplay" style="font-size: 0.8rem; opacity: 0.6; margin-bottom: 0.5rem;">(they/them)</div>
+                                <div id="userBadge" class="user-badge" style="display: inline-block; margin-bottom: 1rem;">Stardust Wanderer</div>
                             <div class="level-progress-wrap">
                                 <div class="level-label">Cosmic Energy: <span id="energyCount">0</span> / <span id="nextLevelEnergy">100</span> (Level <span id="userLevel">1</span>)</div>
                                 <div class="progress-bar-bg"><div class="progress-bar-fill" id="energyFill"></div></div>
                                 <div class="level-hint" style="font-size: 0.75rem; color: var(--silver); opacity: 0.7; margin-top: 0.4rem;">Earn energy by publishing poems & collecting stars!</div>
+                                <button type="button" class="action-btn" id="scrollToEditBtn" style="margin-top: 1rem; padding: 0.5rem 1rem; font-size: 0.7rem; border-color: rgba(255,255,255,0.2);">Edit Cosmic Identity</button>
+                            </div>
                             </div>
                         </div>
                     </div>
@@ -145,6 +149,17 @@
                     <form id="profileForm" class="poem-form" style="max-width: 100%; border: none; padding: 0; margin-top: 2rem;">
                         <label class="insight-label" style="font-size: 1.1rem; color: var(--gold); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; margin-bottom: 1rem; display: block;">Your Bio</label>
                         <textarea id="userBio" placeholder="Tell the universe about your journey..." style="min-height: 80px;"></textarea>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                            <div>
+                                <label class="insight-label" style="font-size: 0.9rem; color: var(--gold); margin-bottom: 0.5rem; display: block;">Pronouns</label>
+                                <input type="text" id="userPronouns" placeholder="e.g. they/them" style="width: 100%;">
+                            </div>
+                            <div>
+                                <label class="insight-label" style="font-size: 0.9rem; color: var(--gold); margin-bottom: 0.5rem; display: block;">Banner URL</label>
+                                <input type="text" id="userBanner" placeholder="Image URL for banner" style="width: 100%;">
+                            </div>
+                        </div>
                         
                         <label class="insight-label" style="font-size: 1.1rem; color: var(--gold); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; margin-bottom: 1rem; display: block; margin-top: 2rem;">Unlockable Avatars</label>
                         <div class="avatar-options" id="avatarPicker">
@@ -215,6 +230,20 @@
                 <a href="#" id="authToggleBtn">Sign Up</a>
             </p>
             <button class="auth-close" id="authClose">×</button>
+        </div>
+    </div>
+
+    <!-- ZEN MODE OVERLAY -->
+    <div id="zenModeOverlay" class="zen-mode-overlay">
+        <button id="zenCloseBtn" class="zen-close">×</button>
+        <div class="zen-content">
+            <div id="zenPoemTitle" class="poem-title"
+                style="font-size: 2.5rem; text-align: center; margin-bottom: 1rem;"></div>
+            <div id="zenPoemAuthor" class="poem-author"
+                style="font-size: 1.2rem; text-align: center; margin-bottom: 3rem;"></div>
+            <div id="zenPoemText" class="poem-text"
+                style="font-size: 1.5rem; text-align: center; max-width: 800px; margin: 0 auto; line-height: 2.2;">
+            </div>
         </div>
     </div>
 

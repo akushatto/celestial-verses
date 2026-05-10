@@ -139,7 +139,8 @@
         });
 
         // --- CORE STATE ---
-        const API_BASE = (window.location.origin === 'null' || !window.location.origin) ? '' : window.location.origin;
+        const IS_LOCAL = (window.location.origin === 'null' || !window.location.origin || window.location.protocol === 'file:');
+        const API_BASE = IS_LOCAL ? '' : window.location.origin;
         let currentUser = localStorage.getItem('celestialVerses_user') || null;
         let customPoems = [];
         let publicPoems = [];
@@ -349,6 +350,13 @@
             e.preventDefault();
             const username = document.getElementById('authUsername').value.trim();
             const password = document.getElementById('authPassword').value;
+            
+            if (IS_LOCAL) {
+                // Mock login for local development
+                loginUser(username);
+                return;
+            }
+
             const endpoint = isSignUpMode ? '/signup' : '/login';
             try {
                 authSubmit.disabled = true;
@@ -425,6 +433,27 @@
             restoreBookmarkState();
             bindActions();
         }
+        async function loadPublicPoems() {
+            try {
+                const res = await fetch(`${API_BASE}/poems`);
+                if(res.ok) {
+                    publicPoems = await res.json();
+                } else {
+                    useFallbackLibrary();
+                }
+            } catch(e) {
+                useFallbackLibrary();
+            }
+            renderPublicPoems();
+        }
+
+        function useFallbackLibrary() {
+            publicPoems = [
+                { id: 'f1', title: "The Cosmic Shore", author: "Carl Sagan", text: "The surface of the Earth is the shore of the cosmic ocean. From it we have learned most of what we know. Recently, we have waded a little out to sea, enough to dampen our toes or, at most, wet our ankles.", username: "SaganBot" },
+                { id: 'f2', title: "I Crave Your Mouth", author: "Pablo Neruda", text: "I crave your mouth, your voice, your hair.\nSilent and starving, I prowl through the streets.\nBread does not nourish me, dawn disrupts me,\nall day I hunt for the liquid measure of your steps.", username: "NerudaFan" },
+                { id: 'f3', title: "The Soul's Orbit", author: "Triyan", text: "We are but satellites of a memory,\nCircling a sun that went dark long ago,\nYet the light still travels to meet us.", username: "Triyan" }
+            ];
+        }
         function renderPublicPoems() {
             if(!publicPoemGrid) return;
             publicPoemGrid.innerHTML = '';
@@ -443,6 +472,11 @@
                         <button type="button" class="action-btn comment-btn" data-id="${poem.id}">💬 Comment</button>
                         <button type="button" class="action-btn share-btn" data-id="${poem.id}">Share</button>
                     </div>
+                    <div class="poem-controls">
+                        <button class="audio-narration-btn" data-audio="space">Play Audio</button>
+                        <button class="zen-btn">Zen Mode</button>
+                        <button class="bookmark-btn">⭐</button>
+                    </div>
                     <div class="comments-section" id="comments-${poem.id}" style="display: none; margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem; font-size: 0.8rem; text-align: left;">
                         <div class="comments-list" style="max-height: 100px; overflow-y: auto; margin-bottom: 0.5rem;"></div>
                         <div style="display: flex; gap: 0.5rem;">
@@ -453,9 +487,6 @@
                 `;
                 fragment.appendChild(div);
                 bindCardEffects(div);
-                if (typeof observer !== 'undefined') {
-                    observer.observe(div);
-                }
             });
             publicPoemGrid.appendChild(fragment);
             injectPoemControls();
@@ -806,31 +837,62 @@
 
         async function loadProfile() {
             if(!currentUser) return;
+            if (IS_LOCAL) {
+                const localProfile = JSON.parse(localStorage.getItem(`celestial_profile_${currentUser}`) || '{}');
+                updateProfileUI(localProfile);
+                return;
+            }
             try {
                 const res = await fetch(`${API_BASE}/profile?username=${encodeURIComponent(currentUser)}`);
                 if(res.ok) {
                     const profile = await res.json();
-                    const uBio = document.getElementById('userBio');
-                    const uAv = document.getElementById('userAvatar');
-                    const uHn = document.getElementById('userHandle');
-                    if(uBio) uBio.value = profile.bio;
-                    if(uAv) uAv.src = profile.avatar_url;
-                    if(uHn) uHn.textContent = `@${currentUser}`;
+                    updateProfileUI(profile);
                 }
             } catch(e) {}
+        }
+
+        function updateProfileUI(profile) {
+            const uBio = document.getElementById('userBio');
+            const uAv = document.getElementById('userAvatar');
+            const uHn = document.getElementById('userHandleDisplay');
+            const uPr = document.getElementById('userPronouns');
+            const uPrD = document.getElementById('userPronounsDisplay');
+            const uBa = document.getElementById('userBanner');
+            const uBaW = document.getElementById('userBannerWrap');
+
+            if(uBio) uBio.value = profile.bio || '';
+            if(uAv) uAv.src = profile.avatar_url || `https://api.dicebear.com/7.x/bottts-neutral/svg?seed=${currentUser}`;
+            if(uHn) uHn.textContent = `@${currentUser}`;
+            if(uPr) uPr.value = profile.pronouns || '';
+            if(uPrD) uPrD.textContent = profile.pronouns ? `(${profile.pronouns})` : '';
+            if(uBa) uBa.value = profile.banner_url || '';
+            if(uBaW && profile.banner_url) uBaW.style.setProperty('--banner-url', `url(${profile.banner_url})`);
         }
 
         const pf = document.getElementById('profileForm'); if(pf) pf.addEventListener('submit', async (e) => {
             e.preventDefault();
             const bio = document.getElementById('userBio').value;
-            const avatar = document.getElementById('userAvatar').src;
+            const pronouns = document.getElementById('userPronouns').value;
+            const banner = document.getElementById('userBanner').value;
+            
+            if (IS_LOCAL) {
+                const profile = { bio, pronouns, banner_url: banner, avatar_url: localStorage.getItem('celestial_avatar_url') };
+                localStorage.setItem(`celestial_profile_${currentUser}`, JSON.stringify(profile));
+                alert('Celestial profile saved locally!');
+                loadProfile();
+                return;
+            }
+
             try {
                 const res = await fetch(`${API_BASE}/profile`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: currentUser, bio, avatar_url: avatar })
+                    body: JSON.stringify({ username: currentUser, bio, pronouns, banner_url: banner })
                 });
-                if(res.ok) alert('Celestial profile updated!');
+                if(res.ok) {
+                    alert('Celestial profile updated!');
+                    loadProfile();
+                }
             } catch(e) {}
         });
 
@@ -1098,8 +1160,14 @@ function renderGamifiedAuras(userLevel) {
     });
 }
 
-// Call on load
+// Initial render
 initGamifiedProfile();
+const sEditBtn = document.getElementById('scrollToEditBtn');
+if (sEditBtn) {
+    sEditBtn.addEventListener('click', () => {
+        document.getElementById('profileForm').scrollIntoView({ behavior: 'smooth' });
+    });
+}
 
 
 // 1. Inject Controls into existing poem cards
@@ -1139,21 +1207,25 @@ function initVOTD() {
 }
 initVOTD();
 
-// 3. Audio Narrations (Simulated)
+// 3. Audio Narrations (Fixing with .closest)
 let narrationAudio = null;
 document.addEventListener('click', e => {
-    if (e.target.classList.contains('audio-narration-btn')) {
-        const btn = e.target;
+    const btn = e.target.closest('.audio-narration-btn');
+    if (btn) {
         if (btn.textContent === 'Stop Audio') {
             if (narrationAudio) { narrationAudio.pause(); narrationAudio = null; }
             btn.textContent = 'Play Audio';
+            btn.classList.remove('active');
             return;
         }
-        document.querySelectorAll('.audio-narration-btn').forEach(b => b.textContent = 'Play Audio');
+        document.querySelectorAll('.audio-narration-btn').forEach(b => {
+            b.textContent = 'Play Audio';
+            b.classList.remove('active');
+        });
         btn.textContent = 'Stop Audio';
+        btn.classList.add('active');
         
         if (narrationAudio) narrationAudio.pause();
-        // Fallback to ambient soundhelix if no specific narration is found
         const src = btn.dataset.audio === 'lunar' 
             ? 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3' 
             : 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3';
@@ -1162,6 +1234,7 @@ document.addEventListener('click', e => {
         
         narrationAudio.onended = () => {
             btn.textContent = 'Play Audio';
+            btn.classList.remove('active');
         };
     }
 });
@@ -1174,8 +1247,9 @@ const zenAuthor = document.getElementById('zenPoemAuthor');
 const zenText = document.getElementById('zenPoemText');
 
 document.addEventListener('click', e => {
-    if (e.target.classList.contains('zen-btn')) {
-        const card = e.target.closest('.poem-card');
+    const btn = e.target.closest('.zen-btn');
+    if (btn) {
+        const card = btn.closest('.poem-card');
         const title = card.querySelector('.poem-title').textContent;
         const author = card.querySelector('.poem-author').textContent;
         const text = card.querySelector('.poem-text').innerHTML;
@@ -1190,17 +1264,25 @@ document.addEventListener('click', e => {
 });
 
 if (zenClose) {
-    zenClose.addEventListener('click', () => {
+    zenClose.addEventListener('click', (e) => {
+        e.stopPropagation();
         zenOverlay.classList.remove('active');
         document.body.style.overflow = '';
     });
 }
+// Escape to close
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && zenOverlay && zenOverlay.classList.contains('active')) {
+        zenOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+});
 
 // 5. Bookmarks
 let bookmarks = JSON.parse(localStorage.getItem('celestialBookmarks') || '[]');
 document.addEventListener('click', e => {
-    if (e.target.classList.contains('bookmark-btn')) {
-        const btn = e.target;
+    const btn = e.target.closest('.bookmark-btn');
+    if (btn) {
         const card = btn.closest('.poem-card');
         const title = card.querySelector('.poem-title').textContent;
         
@@ -1212,6 +1294,20 @@ document.addEventListener('click', e => {
             btn.classList.add('active');
         }
         localStorage.setItem('celestialBookmarks', JSON.stringify(bookmarks));
+    }
+});
+
+// 5b. Card Pop-out effect
+document.addEventListener('click', e => {
+    const card = e.target.closest('.poem-card');
+    const isButton = e.target.closest('button');
+    if (card && !isButton) {
+        document.querySelectorAll('.poem-card').forEach(c => {
+            if (c !== card) c.classList.remove('pop-out');
+        });
+        card.classList.toggle('pop-out');
+    } else if (!card) {
+        document.querySelectorAll('.poem-card').forEach(c => c.classList.remove('pop-out'));
     }
 });
 // Restore bookmark state

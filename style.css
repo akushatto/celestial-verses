@@ -499,7 +499,16 @@
 
         .poem-card:hover {
             transform: translateY(-8px) rotateX(2deg) rotateY(1deg);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, .5), 0 0 40px rgba(201, 168, 76, .1)
+            box-shadow: 0 30px 60px rgba(0, 0, 0, .5), 0 0 40px rgba(201, 168, 76, .1);
+            z-index: 10;
+        }
+
+        .poem-card.pop-out {
+            transform: scale(1.05) translateY(-15px) !important;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, .8), 0 0 60px rgba(201, 168, 76, .3) !important;
+            border-color: var(--gold) !important;
+            z-index: 50 !important;
+            background: rgba(255, 255, 255, 0.06);
         }
 
         .poem-card:hover::before {
@@ -1730,23 +1739,61 @@
             .profile-info-gamified {
                 width: 100%;
             }
-            .avatar-options, .aura-picker {
-                justify-content: center;
             }
-            
-            /* Modals & Overlays */
-            .auth-box {
-                width: 90%;
-                padding: 2rem 1.5rem;
-            }
+        }
+
+        /* PROFILE BANNER */
+        .profile-banner-wrap {
+            position: relative;
+            padding-top: 120px;
+            border-radius: 24px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .profile-banner-wrap::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 120px;
+            background: linear-gradient(135deg, rgba(201, 168, 76, 0.2), rgba(45, 212, 191, 0.2));
+            background-image: var(--banner-url, none);
+            background-size: cover;
+            background-position: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .profile-header-gamified {
+            position: relative;
+            z-index: 2;
+            padding: 0 2rem 2rem;
+            margin-top: -40px;
+        }
+
+        /* BUTTON ANIMATIONS & STATES */
+        .action-btn:active, .audio-narration-btn:active, .zen-btn:active, .bookmark-btn:active {
+            transform: scale(0.95);
+        }
+        .bookmark-btn.active {
+            animation: starPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes starPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.4); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            .auth-box { width: 90%; padding: 2rem 1.5rem; }
             #zenPoemTitle { font-size: 2rem !important; }
             #zenPoemText { font-size: 1.2rem !important; padding: 0 1rem; }
-            
-            /* Ambient Player */
             .ambient-player {
-                bottom: 1rem;
-                right: 1rem;
-                transform: scale(0.9);
-                transform-origin: bottom right;
+                bottom: 1rem; right: 1rem;
+                transform: scale(0.9); transform-origin: bottom right;
+            }
+            .profile-header-gamified {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+                margin-top: -60px;
             }
         }
