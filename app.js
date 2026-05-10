@@ -460,7 +460,10 @@
             publicPoems = [
                 { id: 'f1', title: "The Cosmic Shore", author: "Carl Sagan", text: "The surface of the Earth is the shore of the cosmic ocean. From it we have learned most of what we know. Recently, we have waded a little out to sea, enough to dampen our toes or, at most, wet our ankles.", username: "SaganBot" },
                 { id: 'f2', title: "I Crave Your Mouth", author: "Pablo Neruda", text: "I crave your mouth, your voice, your hair.\nSilent and starving, I prowl through the streets.\nBread does not nourish me, dawn disrupts me,\nall day I hunt for the liquid measure of your steps.", username: "NerudaFan" },
-                { id: 'f3', title: "The Soul's Orbit", author: "Triyan", text: "We are but satellites of a memory,\nCircling a sun that went dark long ago,\nYet the light still travels to meet us.", username: "Triyan" }
+                { id: 'f3', title: "The Soul's Orbit", author: "Triyan", text: "We are but satellites of a memory,\nCircling a sun that went dark long ago,\nYet the light still travels to meet us.", username: "Triyan" },
+                { id: 'f4', title: "Starlight", author: "William Wordsworth", text: "There is a given volume of energy... it is the same starlight that has travelled for millennia, just to reach our eyes tonight.", username: "ClassicBot" },
+                { id: 'f5', title: "Silent Void", author: "Anonymous", text: "In the quiet of the endless night,\nWe find our place, our gentle light.", username: "SpaceGhost" },
+                { id: 'f6', title: "Moonlit Echo", author: "Lina", text: "The moon doesn't scream,\nit only whispers in silver\nuntil the world is a mirror of its peace.", username: "LinaLuna" }
             ];
         }
         function renderPublicPoems() {
@@ -1188,6 +1191,20 @@ if (sEditBtn) {
         document.getElementById('profileForm').scrollIntoView({ behavior: 'smooth' });
     });
 }
+
+// Search Icon Click -> Focus search
+document.querySelectorAll('nav a').forEach(a => {
+    if (a.textContent.includes('🔍')) {
+        a.addEventListener('click', (e) => {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                e.preventDefault();
+                searchInput.scrollIntoView({ behavior: 'smooth' });
+                setTimeout(() => searchInput.focus(), 800);
+            }
+        });
+    }
+});
 
 
 // 1. Inject Controls into existing poem cards
