@@ -421,6 +421,8 @@
                 bindCardEffects(div);
             });
             poemGrid.appendChild(fragment);
+            injectPoemControls();
+            restoreBookmarkState();
             bindActions();
         }
         function renderPublicPoems() {
@@ -456,6 +458,8 @@
                 }
             });
             publicPoemGrid.appendChild(fragment);
+            injectPoemControls();
+            restoreBookmarkState();
         }
 
         function bindActions() {
@@ -1211,16 +1215,19 @@ document.addEventListener('click', e => {
     }
 });
 // Restore bookmark state
-document.querySelectorAll('.poem-card').forEach(card => {
-    const titleEl = card.querySelector('.poem-title');
-    if (titleEl) {
-        const title = titleEl.textContent;
-        if (bookmarks.includes(title)) {
-            const btn = card.querySelector('.bookmark-btn');
-            if (btn) btn.classList.add('active');
+function restoreBookmarkState() {
+    document.querySelectorAll('.poem-card').forEach(card => {
+        const titleEl = card.querySelector('.poem-title');
+        if (titleEl) {
+            const title = titleEl.textContent;
+            if (bookmarks.includes(title)) {
+                const btn = card.querySelector('.bookmark-btn');
+                if (btn) btn.classList.add('active');
+            }
         }
-    }
-});
+    });
+}
+restoreBookmarkState();
 
 // 6. Lunar Whispers Newsletter
 const newsletterForm = document.getElementById('newsletterForm');
