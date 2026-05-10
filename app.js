@@ -139,13 +139,12 @@
         });
 
         // --- CORE STATE ---
-        const API_BASE = window.location.origin;
+        const API_BASE = (window.location.origin === 'null' || !window.location.origin) ? '' : window.location.origin;
         let currentUser = localStorage.getItem('celestialVerses_user') || null;
         let customPoems = [];
         let publicPoems = [];
 
         // --- ELEMENTS ---
-        const navEl = document.querySelector('nav');
         const poemForm = document.getElementById('customPoemForm');
         const poemGrid = document.getElementById('customPoemGrid');
         const publicPoemGrid = document.getElementById('publicPoemGrid');
@@ -807,9 +806,12 @@
                 const res = await fetch(`${API_BASE}/profile?username=${encodeURIComponent(currentUser)}`);
                 if(res.ok) {
                     const profile = await res.json();
-                    document.getElementById('userBio').value = profile.bio;
-                    document.getElementById('userAvatar').src = profile.avatar_url;
-                    document.getElementById('userHandle').textContent = `@${currentUser}`;
+                    const uBio = document.getElementById('userBio');
+                    const uAv = document.getElementById('userAvatar');
+                    const uHn = document.getElementById('userHandle');
+                    if(uBio) uBio.value = profile.bio;
+                    if(uAv) uAv.src = profile.avatar_url;
+                    if(uHn) uHn.textContent = `@${currentUser}`;
                 }
             } catch(e) {}
         }
@@ -835,10 +837,14 @@
                 const res = await fetch(`${API_BASE}/insights?username=${encodeURIComponent(currentUser)}`);
                 if(res.ok) {
                     const data = await res.json();
-                    document.getElementById('stat-views').textContent = data.total_views;
-                    document.getElementById('stat-stars').textContent = data.total_stars;
-                    document.getElementById('stat-poems').textContent = data.poem_count;
-                    document.getElementById('top-poem-title').textContent = data.most_viewed ? data.most_viewed.title : "None yet";
+                    const sV = document.getElementById('stat-views');
+                    const sS = document.getElementById('stat-stars');
+                    const sP = document.getElementById('stat-poems');
+                    const tPT = document.getElementById('top-poem-title');
+                    if(sV) sV.textContent = data.total_views;
+                    if(sS) sS.textContent = data.total_stars;
+                    if(sP) sP.textContent = data.poem_count;
+                    if(tPT) tPT.textContent = data.most_viewed ? data.most_viewed.title : "None yet";
                 }
             } catch(e) {}
         }
@@ -985,16 +991,22 @@ async function updateGamifiedProfileStats() {
             const nextLevelEnergy = level * 200;
             const progressPct = ((energy % 200) / 200) * 100;
             
-            document.getElementById('energyCount').textContent = energy;
-            document.getElementById('nextLevelEnergy').textContent = nextLevelEnergy;
-            document.getElementById('userLevel').textContent = level;
-            document.getElementById('energyFill').style.width = `${progressPct}%`;
+            const eC = document.getElementById('energyCount');
+            const nLE = document.getElementById('nextLevelEnergy');
+            const uL = document.getElementById('userLevel');
+            const eF = document.getElementById('energyFill');
+            const uB = document.getElementById('userBadge');
+            
+            if(eC) eC.textContent = energy;
+            if(nLE) nLE.textContent = nextLevelEnergy;
+            if(uL) uL.textContent = level;
+            if(eF) eF.style.width = `${progressPct}%`;
             
             let title = "Stardust Wanderer";
             if(level >= 2) title = "Nova Architect";
             if(level >= 4) title = "Galaxy Weaver";
             if(level >= 7) title = "Universal Sage";
-            document.getElementById('userBadge').textContent = `Lv.${level} ${title}`;
+            if(uB) uB.textContent = `Lv.${level} ${title}`;
             
             renderGamifiedAvatars(level);
             renderGamifiedAuras(level);
@@ -1055,7 +1067,8 @@ function renderGamifiedAuras(userLevel) {
     if(!picker) return;
     picker.innerHTML = '';
     const storedAura = localStorage.getItem('celestial_aura') || 'var(--gold)';
-    document.getElementById('userAuraRing').style.background = `linear-gradient(135deg, ${storedAura}, transparent, ${storedAura})`;
+    const ring = document.getElementById('userAuraRing');
+    if(ring) ring.style.background = `linear-gradient(135deg, ${storedAura}, transparent, ${storedAura})`;
     
     allAuras.forEach(aura => {
         const isLocked = userLevel < aura.level;
@@ -1069,7 +1082,8 @@ function renderGamifiedAuras(userLevel) {
             opt.onclick = () => {
                 document.querySelectorAll('.aura-opt').forEach(a => a.classList.remove('active'));
                 opt.classList.add('active');
-                document.getElementById('userAuraRing').style.background = `linear-gradient(135deg, ${aura.color}, transparent, ${aura.color})`;
+                const ring = document.getElementById('userAuraRing');
+                if(ring) ring.style.background = `linear-gradient(135deg, ${aura.color}, transparent, ${aura.color})`;
                 localStorage.setItem('celestial_aura', aura.color);
                 updateSidebarStats();
             };
